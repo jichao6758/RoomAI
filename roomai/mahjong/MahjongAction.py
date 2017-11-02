@@ -17,10 +17,10 @@ class MahjongAction(roomai.common.AbstractAction):
     Chow            = 'Chow'
     # 暗杠(Concealed Kong)
     ConKong         = 'ConKong'
-    # 摸牌
-    Draw            = 'Draw'
     # 打牌
     Discard         = 'Discard'
+    # 不操作
+    Null            = 'Null'
 
     @property
     def __init__(self, key):
@@ -30,9 +30,10 @@ class MahjongAction(roomai.common.AbstractAction):
         source:-1 表示来源于环境 0 表示来源于自己手牌 其他表示来源于其他玩家对应的id
 
         '''
-        self.__source  = opt_price[1]
-        self.__card    = opt_price[2:]
-        self.__key     = "%s_%s_%s"%(self.__option, self.__source,"_".join(self.__card))
+        self.__source__     = opt_price[1]
+        self.__card__       = opt_price[2:]
+        self.__key__        = "%s_%s_%s"%(self.__option, self.__source,"_".join(self.__card))
+        self.__effective__  = False   
     def key(self):
         return self.__key
     def option(self):

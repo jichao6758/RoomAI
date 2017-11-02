@@ -64,7 +64,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         # allcards = []
 
         ## public info 
-        self.public_state           = MahjoingPublicState()
+        self.public_state           = MahjongPublicState()
         pu                          = self.public_state
         pu.__num_players            = self.public_state.__num_players
         pu.__dealer_id__            = self.public_state.__dealer_id__
@@ -108,7 +108,13 @@ class MahjongEnv(roomai.common.AbstractEnv):
         if not self.is_action_valid(action, pu, pe[pu.turn]):
             self.logger.critical("action=%s is invalid" % (action.key))
             raise ValueError("action=%s is invalid" % (action.key))
+        for i in range(self.__params__["num_players"]):
 
+            available_actions = self.available_actions(pu,pes[pu.turn])
+            for each_action in available_actions:
+                if each_action == MahjongAction.Kong:
+                    break
+            
     @classmethod
     def compete(cls, env, players):
         '''   
