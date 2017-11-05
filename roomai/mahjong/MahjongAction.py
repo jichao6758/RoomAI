@@ -42,6 +42,8 @@ class MahjongAction(roomai.common.AbstractAction):
         return self.__source
     def card(self):
         return self.__card
+    def effective(self):
+        return self.__effective__
     def __deepcopy__(self, memodict={}, newinstance = None):
         """
 
@@ -61,4 +63,6 @@ class MahjongAction(roomai.common.AbstractAction):
         return AllMahjongActions[key]
 
 AllMahjongActions = dict()
+
+
 

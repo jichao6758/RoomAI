@@ -158,14 +158,36 @@ class MahjongCard(object):
         suit2 = mahjongcard2.suit
         suit3 = mahjongcard3.suit
 
-        pr1 = mahjongcard1.suit
-        pr2 = mahjongcard2.suit
-        pr3 = mahjongcard3.suit
+        pr1 = mahjongcard1.point_rank
+        pr2 = mahjongcard2.point_rank
+        pr3 = mahjongcard3.point_rank
 
         if suit1 == suit2 == suit3 and pr2 * 2 == pr1 + pr3 :
             return True
         else:
             False
+    def compare(cls,mahjongcard1,mahjongcard2):
+        '''
+        Compare two poker cards with their point ranks and suit ranks.
+        The poker card with the higher point rank has the higher rank.
+        With the same point rank, the poker card with the higher suit rank has the higher rank.
+        
+        :param mahjongcard1: 
+        :param mahjongcard2: 
+        :return: A number, which is >0 when the poker card1 has the higher rank than the poker card2, =0 when their share the same rank, <0 when the poker card1 has the lower rank than the poker card2
+        
+        '''
+        pr1 = pokercard1.suit
+        pr2 = pokercard2.suit
+
+
+        if pr1 == pr2:
+            return pokercard1.point_rank - pokercard2.point_rank
+        else:
+            return pokercard1.suit_rank - pokercard2.suit_rank
+    def iswin(cls,mahjongcards,mahjongcard1):
+        # for i in mahjongcards:
+        #     if i
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
             newinstance = MahjongCard(self.get_key())
