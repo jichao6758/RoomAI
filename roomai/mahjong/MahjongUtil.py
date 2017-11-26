@@ -64,31 +64,31 @@ class MahjongCard(object):
         return self.__key__
     key = property(__get_key__, doc="The key of the mahjong card")
 
+    # @classmethod
+    # def istriple(cls,mahjongcard1, mahjongcard2, mahjongcard3):
+    #     '''
+    #         Compare three mahjong cards with their points and suit is same
+
+    #         :param pokercard1: 
+    #         :param pokercard2:
+    #         :param pokercard3: 
+    #         :return: the same true others false
+
+    #     '''
+    #     st1 = pokercard1.get_suit_rank()
+    #     st2 = pokercard2.get_suit_rank()
+    #     st3 = pokercard3.get_suit_rank()
+
+    #     pr1 = pokercard1.get_point_rank()
+    #     pr2 = pokercard2.get_point_rank()
+    #     pr3 = pokercard3.get_point_rank()
+
+    #     if st1 == st2 and st2 == st3  and pr1 == pr2 and pr2 == pr3:
+    #         return True
+    #     else:
+    #         return False
     @classmethod
-    def istriple(cls,mahjongcard1, mahjongcard2, mahjongcard3):
-        '''
-            Compare three mahjong cards with their points and suit is same
-
-            :param pokercard1: 
-            :param pokercard2:
-            :param pokercard3: 
-            :return: the same true others false
-
-        '''
-        st1 = pokercard1.get_suit_rank()
-        st2 = pokercard2.get_suit_rank()
-        st3 = pokercard3.get_suit_rank()
-
-        pr1 = pokercard1.get_point_rank()
-        pr2 = pokercard2.get_point_rank()
-        pr3 = pokercard3.get_point_rank()
-
-        if st1 == st2 and st2 == st3  and pr1 == pr2 and pr2 == pr3:
-            return True
-        else:
-            return False
-    @classmethod
-    def ispair(cls, mahjongcard1, mahjongcard2):
+    def isPair(cls, mahjongcard1, mahjongcard2):
         '''
             Compare two mahjong cards with their points and suit is same
 
@@ -105,7 +105,7 @@ class MahjongCard(object):
         else:
             return False
     @classmethod
-    def istriple(cls,mahjongcard1, mahjongcard2, mahjongcard3):
+    def isTriple(cls,mahjongcard1, mahjongcard2, mahjongcard3):
         '''
             Compare three mahjong cards with their points and suit is same
 
@@ -124,7 +124,7 @@ class MahjongCard(object):
         else:
             return False
     @classmethod
-    def isquadruple(cls,mahjongcard1, mahjongcard2, mahjongcard3. mahjongcard4):
+    def isQuadruple(cls,mahjongcard1, mahjongcard2, mahjongcard3. mahjongcard4):
         '''
             Compare three mahjong cards with their points and suit is same
 
@@ -144,7 +144,7 @@ class MahjongCard(object):
             return True
         else:
             return False 
-    def issequence(cls,mahjongcard1, mahjongcard2, mahjongcard3):
+    def isSequence(cls,mahjongcard1, mahjongcard2, mahjongcard3):
         '''
             Compare three mahjong cards with their points and suit is sequence
             Notice Thr sequence is mahjongcard1-mahjongcard2-mahjongcard3
@@ -185,7 +185,7 @@ class MahjongCard(object):
             return pokercard1.point_rank - pokercard2.point_rank
         else:
             return pokercard1.suit_rank - pokercard2.suit_rank
-    def iswin(cls,mahjongcards):
+    def isWin(cls,mahjongcards):
         # 
         # pair win 
         is_win = True
