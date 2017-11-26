@@ -24,7 +24,7 @@ class StateSpace:
 
 class MahjongCard(object):
     """docstring for MahjongCard"""
-    def __init__(self, arg):
+    def __init__(self, suit):
         point1 = 0
         suit1  = 0
         if suit is None:
@@ -185,9 +185,19 @@ class MahjongCard(object):
             return pokercard1.point_rank - pokercard2.point_rank
         else:
             return pokercard1.suit_rank - pokercard2.suit_rank
-    def iswin(cls,mahjongcards,mahjongcard1):
-        # for i in mahjongcards:
-        #     if i
+    def iswin(cls,mahjongcards):
+        # 
+        # pair win 
+        is_win = True
+        for i in range (0,len(mahjongcards),2):
+            if self.ispair(mahjongcards[i],mahjongcards[i+1]) == False:
+                break 
+        if is_win == True:
+            return is_win
+        is_pair
+        while (i < len(mahjongcards)):
+            if self.ispair(ma)
+
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
             newinstance = MahjongCard(self.get_key())

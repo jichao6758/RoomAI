@@ -51,12 +51,12 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         
         
 
-        self.__players_cards_num    = None   # the list of number of players` remaining cards 
-        self.__players_ready_hand   = None   # the list of the player who ready hand
-        self.__players_chow         = None 
-        self.__players_pong         = None
-        self.__players_kong         = None
-        self.__players_conkong      = None
+        self.__players_cards_num__    = None   # the list of number of players` remaining cards 
+        self.__discard_player__       = None   # the number of players who is the lastest discard
+        self.__players_chow__         = None 
+        self.__players_pong__         = None
+        self.__players_kong__         = None
+        self.__players_conkong__      = None
 
         @property
         def players_cards_num(self):
@@ -124,11 +124,11 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
 class MahjongPrivateState(roomai.common.AbstractPrivateState):
     def __init__(self):
         super(MahjongPrivateState,self).__init__()
-        self.__keep_cards   = []
+        self.__keep_cards__   = []
 
         @property
     def keep_cards(self):
-        return tuple(self.__keep_cards)
+        return tuple(self.__keep_cards__)
 
     def __deepcopy__(self, memodict={}):
 
@@ -146,10 +146,11 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
 
     def __init__(self):
         super(MahjongPersonState,self).__init__()
-        self.__id                 =    0
-        self.__hand_cards         =    []
-        self.__available_actions  =    dict() 
-        self.__show_cards         =    dict()
+        self.__id__                 =    0
+        self.__hand_cards__         =    []
+        self.__available_actions__  =    dict() 
+        self.__show_cards__         =    dict()
+        self.__discard__            =    []
 
     @property
     def id(self):
@@ -157,27 +158,27 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
 
     @property    
     def hand_cards(self):
-        return tuple(self.__hand_cards)
+        return tuple(self.__hand_cards__)
 
-    def __add_card(self,c):
-        self.__hand_cards.append(c)
+    def __add_card__(self,c):
+        self.__hand_cards__.append(c)
 
-        for j in range(len(self.__hand_cards)-1,0,-1):
-            if MahjongCard.compare(self.__hand_cards[j - 1], self.__hand_cards[j]) > 0:
-                tmp = self.__hand_cards[j]
-                self.__hand_cards[j] = self.__hand_cards[j-1]
-                self.__hand_cards[j-1] = tmp
+        for j in range(len(self.__hand_cards__)-1,0,-1):
+            if MahjongCard.compare(self.__hand_cards__[j - 1], self.__hand_cards__[j]) > 0:
+                tmp = self.__hand_cards__[j]
+                self.__hand_cards__[j] = self.__hand_cards__[j-1]
+                self.__hand_cards__[j-1] = tmp
             else:
                 break
 
 
-    def __del_card(self,c):
-        tmp = self.__hand_cards
-        self.__hand_cards = []
+    def __del_card__(self,c):
+        tmp = self.__hand_cards__
+        self.__hand_cards__ = []
         for i in range(len(tmp)):
             if c.key == tmp[i].key:
                 continue
-            self.__hand_cards.append(tmp[i])
+            self.__hand_cards__.append(tmp[i])
 
 
     def __deepcopy__(self, memodict={}):

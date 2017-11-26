@@ -25,14 +25,14 @@ class MahjongAction(roomai.common.AbstractAction):
     @property
     def __init__(self, key):
         opt_list   = key.strip().split("_")
-        self.__option  = opt_price[0]
+        self.__option__  = opt_price[0]
         '''
         source:-1 表示来源于环境 0 表示来源于自己手牌 其他表示来源于其他玩家对应的id
 
         '''
         self.__source__     = opt_price[1]
         self.__card__       = opt_price[2:]
-        self.__key__        = "%s_%s_%s"%(self.__option, self.__source,"_".join(self.__card))
+        self.__key__        = "%s_%s_%s"%(self.__option__, self.__source__,"_".join(self.__card__))
         self.__effective__  = False   
     def key(self):
         return self.__key
