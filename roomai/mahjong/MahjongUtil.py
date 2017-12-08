@@ -1,18 +1,19 @@
 #!/bin/python
-import roomai.common
+# -*- coding: utf-8 -*- 
+#import roomai.common
 import copy
 point_str_to_rank           = {'1':0, '2':1, '3':2, '4':3,  '5':4,  '6':5,  '7':6,  '8':7,\
-                               '9':9}
+                               '9':8}
 point_rank_to_str           = {0:'1', 1:'2', 2:'3', 3:'4', 4:'5',  5:'6',  6:'7',   7:'8',\
                                 8:'9'}
 '''
 筒，条，万，东西南北风，中，发，白
 '''
-suit_str_to_rank            = {'Dot':0, 'Bamboo':1, 'Character':2, 'East':3, 'South':4, \
-                                'West':5, 'NorthWind':6, 'Red':7, 'Green':8,\
+suit_str_to_rank            = {'Dot':0, 'Bamboo':1, 'Character':2, 'EastWind':3, 'SouthWind':4, \
+                                'WestWind':5, 'NorthWind':6, 'Red':7, 'Green':8,\
                                 'WhiteDragon':9}
-suit_rank_to_str            = {0:'Dot', 1:'Bamboo', 2: 'Character', 3:'East', 4:'South', \
-                                5:'West', 6:'NorthWind', 7:'Red', 8:'Green', \
+suit_rank_to_str            = {0:'Dot', 1:'Bamboo', 2: 'Character', 3:'EastWind', 4:'SouthWind', \
+                                5:'WestWind', 6:'NorthWind', 7:'Red', 8:'Green', \
                                 9:'WhiteDragon'}
 
 
@@ -24,7 +25,7 @@ class StateSpace:
 
 class MahjongCard(object):
     """docstring for MahjongCard"""
-    def __init__(self, suit):
+    def __init__(self, point, suit = None):
         point1 = 0
         suit1  = 0
         if suit is None:
@@ -37,13 +38,14 @@ class MahjongCard(object):
                 point1 = point_str_to_rank[point]
             suit1  = suit
             if isinstance(suit, str):
+                print suit
                 suit1 = suit_str_to_rank[suit]
 
         self.__point_str__  = point_rank_to_str[point1]
         self.__suit_str__   = suit_rank_to_str[suit1]
         self.__point_rank__ = point1
         self.__suit_rank__  = suit1
-        self.__key__        = "%s_%s"%(self.__point_rank__, self.__suit_rank__)
+        self.__key__        = "%s_%s"%(self.__point_str__, self.__suit_str__)
     def __get_point_str__(self):
         return self.__point_str__
     point = property(__get_point_str__, doc="The point of the mahjong card")
@@ -119,12 +121,12 @@ class MahjongCard(object):
         key2 = mahjongcard2.key
         key3 = mahjongcard3.key
 
-        if key1 == key2 == key3
+        if key1 == key2 == key3:
             return True
         else:
             return False
     @classmethod
-    def isQuadruple(cls,mahjongcard1, mahjongcard2, mahjongcard3. mahjongcard4):
+    def isQuadruple(cls,mahjongcard1, mahjongcard2, mahjongcard3, mahjongcard4):
         '''
             Compare three mahjong cards with their points and suit is same
 
@@ -140,7 +142,7 @@ class MahjongCard(object):
         key3 = mahjongcard3.key
         key4 = mahjongcard4.key
 
-        if key1 == key2 == key3 == key4
+        if key1 == key2 == key3 == key4:
             return True
         else:
             return False 
@@ -185,18 +187,18 @@ class MahjongCard(object):
             return pokercard1.point_rank - pokercard2.point_rank
         else:
             return pokercard1.suit_rank - pokercard2.suit_rank
-    def isWin(cls,mahjongcards):
-        # 
-        # pair win 
-        is_win = True
-        for i in range (0,len(mahjongcards),2):
-            if self.ispair(mahjongcards[i],mahjongcards[i+1]) == False:
-                break 
-        if is_win == True:
-            return is_win
-        is_pair
-        while (i < len(mahjongcards)):
-            if self.ispair(ma)
+    # def isWin(cls,mahjongcards):
+    #     # 
+    #     # pair win 
+    #     is_win = True
+    #     for i in range (0,len(mahjongcards),2):
+    #         if self.ispair(mahjongcards[i],mahjongcards[i+1]) == False:
+    #             break 
+    #     if is_win == True:
+    #         return is_win
+    #     is_pair
+    #     while (i < len(mahjongcards)):
+    #         if self.ispair(ma)
 
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
@@ -206,15 +208,15 @@ class MahjongCard(object):
         newinstance.String    = self.String
         return newinstance
 
-AllMahjongCard = dict()
+AllMahjongCards = dict()
 for i in range(0,4):
     for point in point_str_to_rank:
-        if point not in ['East','South','West','NorthWind','Red','Green','WhiteDragon']:
+        if point not in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
             for suit in suit_str_to_rank:
-                AllPokerCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
-    for point in ['East','South','West','NorthWind','Red','Green','WhiteDragon']:
-        suin = "0"
-        AllPokerCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
+                AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
+    for suit in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
+        point = "1"
+        AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
 
 
 

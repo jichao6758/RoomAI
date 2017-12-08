@@ -225,6 +225,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         available_actions = {}
         discard = public.__discard_card__
         isExistChow = False
+
         for i in range(len(persion_state.keep_cards) - 1):
             if MahjongCard.isSequence(discard,persion.keep_cards[i],persion.keep_cards[i + 1]) == True:
                 isExistChow = True
@@ -239,7 +240,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 isExistChow = False
         return available_actions
 
-            
+    def available_actions_win(cls)
             
     @classmethod
     def compete(cls, env, players):
