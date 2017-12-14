@@ -2,29 +2,91 @@ from MahjongUtil import MahjongCard
 
 suit_list = ['Dot','Bamboo','Character','EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']
 point_list = ['1','2','3','4','5','6','7','8','9']
-
-def process_fun(card_list,key):
-    if len(card_list) == 13:
-        all_list.append(card_list)
+i = 0
+all_list = dict()
+def process_fun(card_list,start):
+    key = mahjong_map.keys()[start]
+    global i 
+    i = i + 1 
+    for each_key in mahjong_map.keys():
+        if mahjong_map[each_key] > 4:
+            print mahjong_map
+            assert 0
+    #print card_list
+    if len(card_list) == 14:
+        #print card_list
+        global all_list
+        #print card_list
+        if ",".join(card_list) not in all_list.keys():
+            print ",".join(card_list)
+            all_list[",".join(card_list)] = 0
         return 
-    if mahjong_map[key] > 4:
+    if mahjong_map[key] >= 4:
         return
     if mahjong_map[key] <= 1:
         card_list.append(key)
         card_list.append(key)
         card_list.append(key)
         mahjong_map[key] = mahjong_map[key] + 3
-        for card in mahjong_map.key():
-            process_fun(card_list,card)
+        for i in range(start,len(mahjong_map.keys())):
+            process_fun(card_list,i)
+            #print card
+        mahjong_map[key] = mahjong_map[key] - 3
+        card_list.pop()
+        card_list.pop()
+        card_list.pop()
     suit = key.split("_")[0]
-    point = key.split("_")[1]
+    point = int(key.split("_")[1])
     if suit in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
         return
-    if mahjong_map[suit + "_%s" % str(point + 1)] <= 3 and mahjong_map[suit + "_%s" % str(point + 2)] <= 3:
+
+    if point + 2 < 10 and mahjong_map[suit + "_%s" % str(point + 1)] <= 3 and mahjong_map[suit + "_%s" % str(point + 2)] <= 3:
         card_list.append(key)
         card_list.append(suit + "_%s" % str(point + 1))
         card_list.append(suit + "_%s" % str(point + 2))
-        
+        mahjong_map[key] = mahjong_map[key] + 1
+        mahjong_map[suit + "_%s" % str(point + 1)] = mahjong_map[suit + "_%s" % str(point + 1)] + 1
+        mahjong_map[suit + "_%s" % str(point + 2)] = mahjong_map[suit + "_%s" % str(point + 2)] + 1
+        for i in range(start,len(mahjong_map.keys())):
+            process_fun(card_list,i)
+        mahjong_map[key] = mahjong_map[key] - 1
+        mahjong_map[suit + "_%s" % str(point + 1)] = mahjong_map[suit + "_%s" % str(point + 1)] - 1
+        mahjong_map[suit + "_%s" % str(point + 2)] = mahjong_map[suit + "_%s" % str(point + 2)] - 1
+        card_list.pop()
+        card_list.pop()
+        card_list.pop()
+    '''
+    if point > 1 and point + 1 < 10 and mahjong_map[suit + "_%s" % str(point - 1)] <= 3 and mahjong_map[suit + "_%s" % str(point + 1)] <= 3:
+        card_list.append(key)
+        card_list.append(suit + "_%s" % str(point - 1))
+        card_list.append(suit + "_%s" % str(point + 1))
+        mahjong_map[key] = mahjong_map[key] + 1
+        mahjong_map[suit + "_%s" % str(point + 1)] = mahjong_map[suit + "_%s" % str(point + 1)] + 1
+        mahjong_map[suit + "_%s" % str(point - 1)] = mahjong_map[suit + "_%s" % str(point - 1)] + 1
+        for card in mahjong_map.keys():
+            process_fun(card_list,card)
+        mahjong_map[key] = mahjong_map[key] - 1
+        mahjong_map[suit + "_%s" % str(point + 1)] = mahjong_map[suit + "_%s" % str(point + 1)] - 1
+        mahjong_map[suit + "_%s" % str(point - 1)] = mahjong_map[suit + "_%s" % str(point - 1)] - 1
+        card_list.pop()
+        card_list.pop()
+        card_list.pop()
+    if point > 2 and mahjong_map[suit + "_%s" % str(point - 1)] <= 3 and mahjong_map[suit + "_%s" % str(point - 2)] <= 3:
+        card_list.append(key)
+        card_list.append(suit + "_%s" % str(point - 1))
+        card_list.append(suit + "_%s" % str(point - 2))
+        mahjong_map[key] = mahjong_map[key] + 1
+        mahjong_map[suit + "_%s" % str(point - 1)] = mahjong_map[suit + "_%s" % str(point - 1)] + 1
+        mahjong_map[suit + "_%s" % str(point - 2)] = mahjong_map[suit + "_%s" % str(point - 2)] + 1
+        for card in mahjong_map.keys():
+            process_fun(card_list,card)
+        mahjong_map[key] = mahjong_map[key] - 1
+        mahjong_map[suit + "_%s" % str(point - 1)] = mahjong_map[suit + "_%s" % str(point - 1)] - 1
+        mahjong_map[suit + "_%s" % str(point - 2)] = mahjong_map[suit + "_%s" % str(point - 2)] - 1
+        card_list.pop()
+        card_list.pop()
+        card_list.pop()
+    '''
 if __name__ == '__main__':
     mahjong_map = {}
     for suit in suit_list:
@@ -33,17 +95,23 @@ if __name__ == '__main__':
                 mahjong_map[suit + "_" + point] = 0
         else:
             mahjong_map[suit + "_" + point] = 0
-    print mahjong_map
-    all_list = []
-    for each in mahjong_map.keys():
-        cards_list = []
-        cards_list.append[each]
-        cards_list.append[each]
-        mahjong_map[each]  = mahjong_map[each] + 2
-        for each_1 in mahjong_map.keys():
-            if mahjong_map[each_1] > 4:
-                continue
-            else:
+    #print mahjong_map
+    card_list = []
+    key_list = mahjong_map.keys()
+    # print key_list
+    # for i in range(len(key_list) - 1):
+    #     print key_list[i] < key_list[i + 1]
+    # assert 0 
+    card_list = []
+    key_list = mahjong_map.keys()
+    for start in range(len(key_list)):
+        card_list.append(key_list[start])
+        card_list.append(key_list[start])
+        mahjong_map[key_list[start]] = mahjong_map[key_list[start]] + 2
+        process_fun(card_list,start)
+        mahjong_map[key_list[start]] = mahjong_map[key_list[start]] - 2
+        card_list.pop()
+        card_list.pop()
 
 
     #abc = dict(suit_map)
