@@ -208,40 +208,57 @@ class MahjongEnv(roomai.common.AbstractEnv):
         '''
         Generate all valid actions given the public state and the persion state
         :param public_state:
-        :parre persion_state:
+        :parre person_state:
         :return:all valid actions
         '''
         public  = public_state
-        persion = persion_state
+        persion = person_state
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
 
     def available_actions_chow(cls, public_state, person_state):
         public  = public_state
-        persion = persion_state
+        persion = person_state
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
         discard = public.__discard_card__
         isExistChow = False
 
-        for i in range(len(persion_state.keep_cards) - 1):
+        for i in range(len(person_state.keep_cards) - 1):
             if MahjongCard.isSequence(discard,persion.keep_cards[i],persion.keep_cards[i + 1]) == True:
                 isExistChow = True
-            if MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
+            elif MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
                 isExistChow = True
-            if MahjongCard.isSequence(persion.keep_cards[i],persion.keep_cards[i + 1], discard) == True:
+            elif MahjongCard.isSequence(persion.keep_cards[i],persion.keep_cards[i + 1], discard) == True:
                 isExistChow = True
             if isExistChow == True:
-                if len(available_actions[MahjongCard.Chow]) == 0 or available_actions[MahjongCard.Chow] is None
+                if available_actions[MahjongCard.Chow] is None or len(available_actions[MahjongCard.Chow]) == 0:
                     available_actions[MahjongCard.Chow] = []
-                available_actions[MahjongCard.Chow].append(persion.keep_cards[i],persion.keep_cards[i + 1])
+                available_actions[MahjongCard.Chow].append((persion.keep_cards[i],persion.keep_cards[i + 1]))
                 isExistChow = False
         return available_actions
 
-    def available_actions_win(cls)
-            
+    def available_actions_win(cls,public_state,person_state)
+        public  = public_state
+        persion = person_state
+        turn    = public.turn
+        key_actions = dict()
+        available_actions = {}
+        discard = public.__discard_card__
+        cards = []
+        isInsert = False
+        for each in person_state.keep_cards:
+            if MahjongCard.compare(each,discard) < 0 or isInsert == True:
+                cards.append(each.__deepcopy__())
+            else isInsert == False:
+                cards.append(discard.__deepcopy__())
+                cards.append(each.__deepcopy__())
+                isInsert == True
+        if MahjongCard.isWin(cards) == True:
+            available_actions[MahjongCard.Win] = [discard]
+
     @classmethod
     def compete(cls, env, players):
         '''   
