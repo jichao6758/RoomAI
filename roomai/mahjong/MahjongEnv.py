@@ -229,15 +229,15 @@ class MahjongEnv(roomai.common.AbstractEnv):
         for i in range(len(person_state.keep_cards) - 1):
             if MahjongCard.isSequence(discard,persion.keep_cards[i],persion.keep_cards[i + 1]) == True:
                 isExistChow = True
-            elif MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
-                isExistChow = True
-            elif MahjongCard.isSequence(persion.keep_cards[i],persion.keep_cards[i + 1], discard) == True:
-                isExistChow = True
+            # elif MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
+            #     isExistChow = True
+            # elif MahjongCard.isSequence(persion.keep_cards[i],persion.keep_cards[i + 1], discard) == True:
+            #     isExistChow = True
             if isExistChow == True:
-                if available_actions[MahjongCard.Chow] is None or len(available_actions[MahjongCard.Chow]) == 0:
-                    available_actions[MahjongCard.Chow] = []
-                available_actions[MahjongCard.Chow].append((persion.keep_cards[i],persion.keep_cards[i + 1]))
-                isExistChow = False
+                key = "%s_%s_%s" %(MahjongCard.Chow,turn,"_".join([discard.key,persion.keep_cards[i].key,persion.keep_cards[i + 1].key]))
+                available_actions[key] = MahjongAction.lookup(key)
+            isExistChow = False
+                #available_actions[MahjongCard.Chow].append((persion.keep_cards[i],persion.keep_cards[i + 1]))
         return available_actions
 
     def available_actions_win(cls,public_state,person_state)
@@ -257,8 +257,9 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 cards.append(each.__deepcopy__())
                 isInsert == True
         if MahjongCard.isWin(cards) == True:
-            available_actions[MahjongCard.Win] = [discard]
-
+            key = "%s_%s_%s" %(MahjongCard.Win,turn,"_".join([each.key for each in cards]))
+            available_actions[key] = MahjongAction.lookup(key)
+        return available_actions
     @classmethod
     def compete(cls, env, players):
         '''   

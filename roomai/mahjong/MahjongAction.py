@@ -35,13 +35,13 @@ class MahjongAction(roomai.common.AbstractAction):
         self.__key__        = "%s_%s_%s"%(self.__option__, self.__source__,"_".join(self.__card__))
         self.__effective__  = False   
     def key(self):
-        return self.__key
+        return self.__key__
     def option(self):
-        return self.__option
+        return self.__option__
     def source(self):
-        return self.__source
+        return self.__source__
     def card(self):
-        return self.__card
+        return self.__card__
     def effective(self):
         return self.__effective__
     def __deepcopy__(self, memodict={}, newinstance = None):
