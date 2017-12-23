@@ -162,6 +162,9 @@ class MahjongEnv(roomai.common.AbstractEnv):
             public.__turn__                                = public.__turn__
             persion[public.__turn__].__available_actions__ = self.available_actions(public,persion[public.__turn__])
             return infos,public,persion,private
+        """
+        动作为暗杠
+        """
         if action.effective == True and action.option == MahjongCard.ConKong:
             public.__previous_id__               = public.__turn__
             public.__previous_action__           = action
@@ -184,7 +187,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 public.__turn__ = i
                 return infos,public,persion,private
         while (i != self.__discard_player__):
-            available_actions = self.available_actions_special(public,persion[i])
+            available_actions = self.available_actions_kong(public,persion[i])
             if len(available_actions) != 0:
                 public.__previous_id__     = public.__turn__
                 public.__previous_action__ = action
@@ -216,8 +219,13 @@ class MahjongEnv(roomai.common.AbstractEnv):
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
-
-    def available_actions_chow(cls, public_state, person_state):
+        if MahjongCard.isWin(person.keep_cards) == True:
+            key = "%s_%s_%s" %(MahjongCard.Win,turn,"_".join([each.key for each in cards]))
+            available_actions[key] = MahjongAction.lookup(key)
+        for i in range(len(person.keep_cards)):
+             key = "%s_%s_%s" %(MahjongCard.Discard,0,person.keep_cards[i].key)
+             available_actions[key] = MahjongAction.lookup(key)
+    def available_actions_kong(cls,public_state,person_state):
         public  = public_state
         persion = person_state
         turn    = public.turn
@@ -225,8 +233,26 @@ class MahjongEnv(roomai.common.AbstractEnv):
         available_actions = {}
         discard = public.__discard_card__
         isExistChow = False
+        for i in range(len(person.keep_cards) - 2):
+            if person.keep_cards[i].key == discard.key:
+                if MahjongCard.isQuadruple(discard,person.keep_cards[i],person.keep_cards[i + 1],person.keep_cards[i + 2]) == True:
+                   key = "%s_%s_%s" %(MahjongCard.Kong,turn,"_".join([discard.key,persion.keep_cards[i].key,persion.keep_cards[i + 1].key,persion.keep_cards[i + 2].key]))
+                   available_actions[key] = MahjongAction.lookup(key)
+                   return available_actions
+                else:
+                    return available_actions
 
-        for i in range(len(person_state.keep_cards) - 1):
+        return available_actions
+    def available_actions_chow(cls, public_state, person_state):
+        public  = public_state
+        person  = person_state
+        turn    = public.turn
+        key_actions = dict()
+        available_actions = {}
+        discard = public.__discard_card__
+        isExistChow = False
+
+        for i in range(len(person.keep_cards) - 1):
             if MahjongCard.isSequence(discard,persion.keep_cards[i],persion.keep_cards[i + 1]) == True:
                 isExistChow = True
             # elif MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
@@ -249,7 +275,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         discard = public.__discard_card__
         cards = []
         isInsert = False
-        for each in person_state.keep_cards:
+        for each in person.keep_cards:
             if MahjongCard.compare(each,discard) < 0 or isInsert == True:
                 cards.append(each.__deepcopy__())
             else isInsert == False:
