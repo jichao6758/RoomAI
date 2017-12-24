@@ -83,13 +83,13 @@ class MahjongEnv(roomai.common.AbstractEnv):
  
         ## person info
         self.person_states          = [MahjoingPersonState() for i in range(self.__params__["num_players"])]
-        persion                         = self.person_states
+        person                         = self.person_states
         hand_cards       = []
         for i in xrange(self.__params__["num_players"]):
-            persion[i].__id__ = i
-            persion[i].__hand_cards__ = self.__params__["allcards"][i*12:(i+1)*12].sort(MahjongCard.compare)
-        persion[self.__dealer_id__].__hand_cards__.append(allcards[self.num_players*12])
-        persion[public.turn].__available_actions__ = self.available_actions(pu,persion[public.turn])
+            person[i].__id__ = i
+            person[i].__hand_cards__ = self.__params__["allcards"][i*12:(i+1)*12].sort(MahjongCard.compare)
+        person[self.__dealer_id__].__hand_cards__.append(allcards[self.num_players*12])
+        person[public.turn].__available_actions__ = self.available_actions(pu,person[public.turn])
         self.__gen_history__()
         infos = self.__gen_infos__()
         if self.logger.level <= logging.DEBUG:
@@ -100,12 +100,12 @@ class MahjongEnv(roomai.common.AbstractEnv):
                     public.big_blind_bet
                 ))
 
-            return infos, pu, persion, pr
+            return infos, pu, person, pr
     ## we need ensure the action is valid
     #@Overide
     def forward(self, action):
         public  = self.public_state
-        persion = self.person_states
+        person = self.person_states
         private = self.private_state
         """[summary]
         
@@ -116,7 +116,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
             public.__previous_action__  = action
             public.__is_terminal__      = true
             public.__scores__             = self.__compute_scores__()
-            return infos,public,persion,private
+            return infos,public,person,private
         
         """[summary]
         动作为吃,或者碰，还是这个人出牌
@@ -130,7 +130,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
             将碰的牌记录到public_state
             '''
             if action.option == MahjongCard.Pong:
-                pong = persion[public.__turn__].__discard__
+                pong = person[public.__turn__].__discard__
                 pong.append(MahjongCard(action.__card__))
                 public.__players_pong__.append((public.__discard_player__,public.__turn__,pong))
             '''[summary]
@@ -138,14 +138,14 @@ class MahjongEnv(roomai.common.AbstractEnv):
             将吃的牌记录到public_state
             '''
             if action.option == MahjongCard.Chow:
-                chow = persion[public.__turn__].__discard__
+                chow = person[public.__turn__].__discard__
                 chow.append(MahjongCard(action.__card__))
                 public.__players_chow((public.__discard_player__,public.__turn__,chow))
 
-            persion[public.__turn__].__discard__           = []
+            person[public.__turn__].__discard__           = []
             public.__turn__                                = public.__turn__
-            persion[public.__turn__].__available_actions__ = self.available_actions(public,persion[public.__turn__])
-            return infos,public,persion,private
+            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
+            return infos,public,person,private
 
         """[summary]
         
@@ -154,80 +154,88 @@ class MahjongEnv(roomai.common.AbstractEnv):
         if action.effective == True and action.option == MahjongCard.Kong:
             public.__previous_id__      = public.__turn__
             public.__previous_action__  = action
-            kong                        = persion[public.__turn__].__discard__
+            kong                        = person[public.__turn__].__discard__
             kong.append(MahjongCard(action.__card__))
-            persion[public.__turn__].__discard__ = []
+            person[public.__turn__].__discard__ = []
             public.__players_kong__.append((public.__discard_player__,public.__turn__,kong))
-            persion[public.__turn__].__add_card__(private.__keep_cards__.pop())
+            person[public.__turn__].__add_card__(private.__keep_cards__.pop())
             public.__turn__                                = public.__turn__
-            persion[public.__turn__].__available_actions__ = self.available_actions(public,persion[public.__turn__])
-            return infos,public,persion,private
+            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
+            return infos,public,person,private
         """
         动作为暗杠
         """
         if action.effective == True and action.option == MahjongCard.ConKong:
             public.__previous_id__               = public.__turn__
             public.__previous_action__           = action
-            persion[public.__turn__].__discard__ = []
+            person[public.__turn__].__discard__ = []
             public.conkong[public.__turn__]      = public.conkong[public.__turn__] + 1
-            persion[public.__turn__].__add_card__(private.__keep_cards__.pop())
+            person[public.__turn__].__add_card__(private.__keep_cards__.pop())
             public.__turn__                                = public.__turn__
-            persion[public.__turn__].__available_actions__ = self.available_actions(public,persion[public.__turn__])
-            return infos,public,persion,private
+            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
+            return infos,public,person,private
         if action.effective == True and action.option == MahjongCard.Discard:
             public.__discard_player__ = public.__turn__
             public.__discard_card__   = MahjongCard(action.__card__)
         i = self.__turn__ + 1 % self.__params__["num_players"]
         while (i != self.__discard_player__):
-            available_actions = self.available_actions_win(public,persion[i])
+            available_actions = self.available_actions_win(public,person[i])
             if len(available_actions) != 0:
                 public.__previous_id__     = public.__turn__
                 public.__previous_action__ = action
-                persion[i].__available_actions__ = available_actions
+                person[i].__available_actions__ = available_actions
                 public.__turn__ = i
-                return infos,public,persion,private
+                return infos,public,person,private
         while (i != self.__discard_player__):
-            available_actions = self.available_actions_kong(public,persion[i])
+            available_actions = self.available_actions_kong(public,person[i])
             if len(available_actions) != 0:
                 public.__previous_id__     = public.__turn__
                 public.__previous_action__ = action
-                persion[i].__available_actions__ = available_actions
+                person[i].__available_actions__ = available_actions
                 public.__turn__ = i
-                return infos,public,persion,private
+                return infos,public,person,private
         public.__previous_id__ = public.__turn__
         public.__previous_action__ = action
         public.__turn__ = public.__discard_player__ + 1 % self.__params__["num_players"]
-        available_actions = self.available_actions_chow(public,persion[public.__turn__])
+        available_actions = self.available_actions_chow(public,person[public.__turn__])
         if len(available_actions) == 0:
-            persion[public.__turn__].__add_card__(private.__keep_cards__.pop())
-            available_actions = self.available_actions(public,persion[public.__turn__])
-        persion[public.__turn__].__available_actions__ 
-        return infos,public,persion,private
+            person[public.__turn__].__add_card__(private.__keep_cards__.pop())
+            available_actions = self.available_actions(public,person[public.__turn__])
+        person[public.__turn__].__available_actions__ 
+        return infos,public,person,private
             
     
             
     @classmethod
     def available_actions(cls, public_state, person_state):
         '''
-        Generate all valid actions given the public state and the persion state
+        Generate all valid actions given the public state and the person state
         :param public_state:
         :parre person_state:
         :return:all valid actions
         '''
         public  = public_state
-        persion = person_state
+        person = person_state
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
         if MahjongCard.isWin(person.keep_cards) == True:
-            key = "%s_%s_%s" %(MahjongCard.Win,turn,"_".join([each.key for each in cards]))
+            key = "%s_%s_%s" %(MahjongAction.Win,turn,"_".join([each.key for each in cards]))
             available_actions[key] = MahjongAction.lookup(key)
         for i in range(len(person.keep_cards)):
-             key = "%s_%s_%s" %(MahjongCard.Discard,0,person.keep_cards[i].key)
+             key = "%s_%s_%s" %(MahjongAction.Discard,0,person.keep_cards[i].key)
              available_actions[key] = MahjongAction.lookup(key)
+        i = 0
+        while i < len(person.keep_cards) - 3:
+            if MahjongCard.isQuadruple(person.keep_cards[i],person.keep_cards[i + 1],person.keep_cards[i + 2],person.keep_cards[i + 3]) == True:
+                key = "%s_%s_%s" %(MahjongAction.ConKong,0,"_".join([person.keep_cards[i].key,person.keep_cards[i + 1].key,person.keep_cards[i + 2].key,person.keep_cards[i + 3].key]))
+                available_actions[key] = MahjongAction.lookup(key)
+                i = i + 4
+
+
     def available_actions_kong(cls,public_state,person_state):
         public  = public_state
-        persion = person_state
+        person = person_state
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
@@ -236,7 +244,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         for i in range(len(person.keep_cards) - 2):
             if person.keep_cards[i].key == discard.key:
                 if MahjongCard.isQuadruple(discard,person.keep_cards[i],person.keep_cards[i + 1],person.keep_cards[i + 2]) == True:
-                   key = "%s_%s_%s" %(MahjongCard.Kong,turn,"_".join([discard.key,persion.keep_cards[i].key,persion.keep_cards[i + 1].key,persion.keep_cards[i + 2].key]))
+                   key = "%s_%s_%s" %(MahjongCard.Kong,turn,"_".join([discard.key,person.keep_cards[i].key,person.keep_cards[i + 1].key,person.keep_cards[i + 2].key]))
                    available_actions[key] = MahjongAction.lookup(key)
                    return available_actions
                 else:
@@ -253,22 +261,22 @@ class MahjongEnv(roomai.common.AbstractEnv):
         isExistChow = False
 
         for i in range(len(person.keep_cards) - 1):
-            if MahjongCard.isSequence(discard,persion.keep_cards[i],persion.keep_cards[i + 1]) == True:
+            if MahjongCard.isSequence(discard,person.keep_cards[i],person.keep_cards[i + 1]) == True:
                 isExistChow = True
-            # elif MahjongCard.isSequence(persion.keep_cards[i],discard,persion.keep_cards[i + 1]) == True:
+            # elif MahjongCard.isSequence(person.keep_cards[i],discard,person.keep_cards[i + 1]) == True:
             #     isExistChow = True
-            # elif MahjongCard.isSequence(persion.keep_cards[i],persion.keep_cards[i + 1], discard) == True:
+            # elif MahjongCard.isSequence(person.keep_cards[i],person.keep_cards[i + 1], discard) == True:
             #     isExistChow = True
             if isExistChow == True:
-                key = "%s_%s_%s" %(MahjongCard.Chow,turn,"_".join([discard.key,persion.keep_cards[i].key,persion.keep_cards[i + 1].key]))
+                key = "%s_%s_%s" %(MahjongAction.Chow,turn,"_".join([discard.key,person.keep_cards[i].key,person.keep_cards[i + 1].key]))
                 available_actions[key] = MahjongAction.lookup(key)
             isExistChow = False
-                #available_actions[MahjongCard.Chow].append((persion.keep_cards[i],persion.keep_cards[i + 1]))
+                #available_actions[MahjongCard.Chow].append((person.keep_cards[i],person.keep_cards[i + 1]))
         return available_actions
 
     def available_actions_win(cls,public_state,person_state)
         public  = public_state
-        persion = person_state
+        person = person_state
         turn    = public.turn
         key_actions = dict()
         available_actions = {}
