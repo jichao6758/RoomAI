@@ -75,7 +75,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         public.__out_of_card__          = None
         public.__action_list__          = None
         public.__discard_player__       = None
-        public.__discard__
+        public.__discard__              = None
         ## private info
         self.private_state          = MahjongPrivateState()
         private                          = self.private_state
@@ -87,8 +87,12 @@ class MahjongEnv(roomai.common.AbstractEnv):
         hand_cards       = []
         for i in xrange(self.__params__["num_players"]):
             person[i].__id__ = i
-            person[i].__hand_cards__ = self.__params__["allcards"][i*12:(i+1)*12].sort(MahjongCard.compare)
-        person[self.__dealer_id__].__hand_cards__.append(allcards[self.num_players*12])
+            hand_cards = self.__params__["allcards"][i*12:(i+1)*12]#.sort(MahjongCard.compare)
+            #person[i].__hand_cards__ = self.__params__["allcards"][i*12:(i+1)*12]#.sort(MahjongCard.compare)
+            if i == self.__dealer_id__:
+                hand_cards.append(allcards[self.num_players*12])
+            person[i].__hand_cards__ = hand_cards.sort(MahjongCard.compare)
+        #for i in xrange(self.__params__)
         person[public.turn].__available_actions__ = self.available_actions(pu,person[public.turn])
         self.__gen_history__()
         infos = self.__gen_infos__()
@@ -108,7 +112,6 @@ class MahjongEnv(roomai.common.AbstractEnv):
         person = self.person_states
         private = self.private_state
         """[summary]
-        
         动作为胡,直接game_over,计算得分
         """
         if action.effective == True and action.option == MahjongCard.Win:
@@ -140,7 +143,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
             if action.option == MahjongCard.Chow:
                 chow = person[public.__turn__].__discard__
                 chow.append(MahjongCard(action.__card__))
-                public.__players_chow((public.__discard_player__,public.__turn__,chow))
+                public.__players_chow__((public.__discard_player__,public.__turn__,chow))
 
             person[public.__turn__].__discard__           = []
             public.__turn__                                = public.__turn__
@@ -148,7 +151,6 @@ class MahjongEnv(roomai.common.AbstractEnv):
             return infos,public,person,private
 
         """[summary]
-        
         动作为杠
         """
         if action.effective == True and action.option == MahjongCard.Kong:
@@ -215,22 +217,24 @@ class MahjongEnv(roomai.common.AbstractEnv):
         :return:all valid actions
         '''
         public  = public_state
-        person = person_state
+        person  = person_state
         turn    = public.turn
         key_actions = dict()
-        available_actions = {}
+        #available_actions = {}
         if MahjongCard.isWin(person.keep_cards) == True:
-            key = "%s_%s_%s" %(MahjongAction.Win,turn,"_".join([each.key for each in cards]))
-            available_actions[key] = MahjongAction.lookup(key)
+            key = "%s_%s_%s" %(MahjongAction.Win,0,"_".join([each.key for each in cards]))
+            key_actions[key] = MahjongAction.lookup(key)
         for i in range(len(person.keep_cards)):
              key = "%s_%s_%s" %(MahjongAction.Discard,0,person.keep_cards[i].key)
-             available_actions[key] = MahjongAction.lookup(key)
+             key_actions[key] = MahjongAction.lookup(key)
         i = 0
         while i < len(person.keep_cards) - 3:
             if MahjongCard.isQuadruple(person.keep_cards[i],person.keep_cards[i + 1],person.keep_cards[i + 2],person.keep_cards[i + 3]) == True:
                 key = "%s_%s_%s" %(MahjongAction.ConKong,0,"_".join([person.keep_cards[i].key,person.keep_cards[i + 1].key,person.keep_cards[i + 2].key,person.keep_cards[i + 3].key]))
-                available_actions[key] = MahjongAction.lookup(key)
+                key_actions[key] = MahjongAction.lookup(key)
                 i = i + 4
+            else:
+                i = i + 1
 
 
     def available_actions_kong(cls,public_state,person_state):
@@ -238,25 +242,25 @@ class MahjongEnv(roomai.common.AbstractEnv):
         person = person_state
         turn    = public.turn
         key_actions = dict()
-        available_actions = {}
+        #available_actions = {}
         discard = public.__discard_card__
         isExistChow = False
         for i in range(len(person.keep_cards) - 2):
             if person.keep_cards[i].key == discard.key:
                 if MahjongCard.isQuadruple(discard,person.keep_cards[i],person.keep_cards[i + 1],person.keep_cards[i + 2]) == True:
                    key = "%s_%s_%s" %(MahjongCard.Kong,turn,"_".join([discard.key,person.keep_cards[i].key,person.keep_cards[i + 1].key,person.keep_cards[i + 2].key]))
-                   available_actions[key] = MahjongAction.lookup(key)
-                   return available_actions
+                   key_actions[key] = MahjongAction.lookup(key)
+                   return key_actions
                 else:
-                    return available_actions
+                    return key_actions
 
-        return available_actions
+        return key_actions
     def available_actions_chow(cls, public_state, person_state):
         public  = public_state
         person  = person_state
         turn    = public.turn
         key_actions = dict()
-        available_actions = {}
+        #available_actions = {}
         discard = public.__discard_card__
         isExistChow = False
 
@@ -269,17 +273,17 @@ class MahjongEnv(roomai.common.AbstractEnv):
             #     isExistChow = True
             if isExistChow == True:
                 key = "%s_%s_%s" %(MahjongAction.Chow,turn,"_".join([discard.key,person.keep_cards[i].key,person.keep_cards[i + 1].key]))
-                available_actions[key] = MahjongAction.lookup(key)
+                key_actions[key] = MahjongAction.lookup(key)
             isExistChow = False
-                #available_actions[MahjongCard.Chow].append((person.keep_cards[i],person.keep_cards[i + 1]))
-        return available_actions
+                #key_actions[MahjongCard.Chow].append((person.keep_cards[i],person.keep_cards[i + 1]))
+        return key_actions
 
     def available_actions_win(cls,public_state,person_state)
         public  = public_state
         person = person_state
         turn    = public.turn
         key_actions = dict()
-        available_actions = {}
+        #available_actions = {}
         discard = public.__discard_card__
         cards = []
         isInsert = False
@@ -292,8 +296,8 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 isInsert == True
         if MahjongCard.isWin(cards) == True:
             key = "%s_%s_%s" %(MahjongCard.Win,turn,"_".join([each.key for each in cards]))
-            available_actions[key] = MahjongAction.lookup(key)
-        return available_actions
+            key_actions[key] = MahjongAction.lookup(key)
+        return key_actions
     @classmethod
     def compete(cls, env, players):
         '''   
@@ -318,5 +322,8 @@ class MahjongEnv(roomai.common.AbstractEnv):
 
         return public.scores
 
-
+    def __compute_scores__(self):
+        scores = [-1 for i in rage(self.__params__["num_players"])]
+        scores[self.public_state.turn]  = 100
+        return scores
      

@@ -23,7 +23,7 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         self.__previous_action__      = None    # previous_action
         self.__remaining_card_num__   = None    # remaining_car_num
         self.__out_of_card__          = None    # out of card
-
+        self.__win_by_discard__       = None    # the id of who discard 
         @property
         def dealer_id(self):
             return self.__dealer_id

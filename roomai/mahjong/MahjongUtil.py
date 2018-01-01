@@ -46,6 +46,7 @@ class MahjongCard(object):
         self.__point_rank__ = point1
         self.__suit_rank__  = suit1
         self.__key__        = "%s_%s"%(self.__point_str__, self.__suit_str__)
+        self.__win_pattern__ = []
     def __get_point_str__(self):
         return self.__point_str__
     point = property(__get_point_str__, doc="The point of the mahjong card")
@@ -190,15 +191,15 @@ class MahjongCard(object):
     def isWin(cls,mahjongcards):
         # 
         # pair win 
-        is_win = True
-        for i in range (0,len(mahjongcards),2):
-            if self.ispair(mahjongcards[i],mahjongcards[i+1]) == False:
-                break 
-        if is_win == True:
-            return is_win
-        is_pair
-        while (i < len(mahjongcards)):
-            if self.ispair(ma)
+        if len(self.__win_pattern__) == 0:
+            #fopen = open("result.txt","r")
+            for each in open("result.txt","r"):
+                self.__win_pattern__.append(each)
+        key = ",".join([each.key for each in mahjongcards])
+        if key in self.__win_pattern__:
+            return True
+        else:
+            return False
 
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
