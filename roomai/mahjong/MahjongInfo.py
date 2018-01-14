@@ -1,4 +1,5 @@
 #!/bin/python
+#coding=utf8
 import roomai.common
 from roomai.mahjong import MahjongCard
 class MahjongPublicState(roomai.common.AbstractPublicState):
@@ -16,14 +17,14 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         '''[summary]
         
         ''' 
-        self.__num_players            = None    # palyer_num
-        self.__dealer_id__            = None    # who is dealer
-        self.__turn__                 = None    # next turn
-        self.__previous_id__          = None    # previous_id
-        self.__previous_action__      = None    # previous_action
-        self.__remaining_card_num__   = None    # remaining_car_num
-        self.__out_of_card__          = None    # out of card
-        self.__win_by_discard__       = None    # the id of who discard 
+        self.__num_players__            = None    # palyer_num
+        self.__dealer_id__              = None    # who is dealer
+        self.__turn__                   = None    # next turn
+        self.__previous_id__            = None    # previous_id
+        self.__previous_action__        = None    # previous_action
+        self.__remaining_card_num__     = None    # remaining_car_num
+        self.__out_of_card__            = None    # out of card
+        self.__win_by_discard__         = None    # the id of who discard 
         @property
         def dealer_id(self):
             return self.__dealer_id
@@ -113,7 +114,7 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         else:
             copyinstance.players_pong = [(self.players_pong[i][0],self.players_pong[i][1].__deepcopy__()) for i in xrange(len(self.players_pong))]
         if self.players_kong is None:
-            copyinstance.players_kong = None:
+            copyinstance.players_kong = None
         else:
             copyinstance.players_kong = [(self.players_kong[i][0],self.players_kong[i][1].__deepcopy__()) for i in xrange(len(self.players_pong))]
         if self.players_conkong is None:
@@ -126,13 +127,13 @@ class MahjongPrivateState(roomai.common.AbstractPrivateState):
         super(MahjongPrivateState,self).__init__()
         self.__keep_cards__   = []
 
-        @property
+    @property
     def keep_cards(self):
         return tuple(self.__keep_cards__)
 
     def __deepcopy__(self, memodict={}):
 
-        copy = new MahjongPrivateState
+        copy = MahjongPrivateState()
         if self.keep_cards == None:
             copy.keep_cards = None
         else:
@@ -197,7 +198,7 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
             copyinstance.available_actions = None
         return copyinstance
 
-AllCardsPattern = dict{}
+AllCardsPattern = dict()
 #0     1           2       3           4                                    5     6
 #name, StraightNum, PairNum, SameSuit, [SizeOfPair1, SizeOfPair2,..](desc), rank, cards
-AllCardsPattern[""]
+#AllCardsPattern[""]

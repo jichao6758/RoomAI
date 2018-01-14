@@ -15,7 +15,11 @@ suit_str_to_rank            = {'Dot':0, 'Bamboo':1, 'Character':2, 'EastWind':3,
 suit_rank_to_str            = {0:'Dot', 1:'Bamboo', 2: 'Character', 3:'EastWind', 4:'SouthWind', \
                                 5:'WestWind', 6:'NorthWind', 7:'Red', 8:'Green', \
                                 9:'WhiteDragon'}
-
+win_pattern = []
+if len(win_pattern) == 0:
+    #fopen = open("result.txt","r")
+    for each in open("D:/RoomAI/roomai/mahjong/result.txt","r"):
+        win_pattern.append(each)
 
 class StateSpace:
     """
@@ -147,6 +151,7 @@ class MahjongCard(object):
             return True
         else:
             return False 
+    @classmethod
     def isSequence(cls,mahjongcard1, mahjongcard2, mahjongcard3):
         '''
             Compare three mahjong cards with their points and suit is sequence
@@ -169,6 +174,7 @@ class MahjongCard(object):
             return True
         else:
             False
+    @classmethod
     def compare(cls,mahjongcard1,mahjongcard2):
         '''
         Compare two poker cards with their point ranks and suit ranks.
@@ -180,27 +186,26 @@ class MahjongCard(object):
         :return: A number, which is >0 when the poker card1 has the higher rank than the poker card2, =0 when their share the same rank, <0 when the poker card1 has the lower rank than the poker card2
         
         '''
-        pr1 = pokercard1.suit
-        pr2 = pokercard2.suit
+        pr1 = mahjongcard1.suit
+        pr2 = mahjongcard2.suit
 
 
         if pr1 == pr2:
-            return pokercard1.point_rank - pokercard2.point_rank
+            return mahjongcard1.point_rank - mahjongcard2.point_rank
         else:
-            return pokercard1.suit_rank - pokercard2.suit_rank
+            return mahjongcard1.suit_rank - mahjongcard2.suit_rank
+    @classmethod
     def isWin(cls,mahjongcards):
         # 
         # pair win 
-        if len(self.__win_pattern__) == 0:
-            #fopen = open("result.txt","r")
-            for each in open("result.txt","r"):
-                self.__win_pattern__.append(each)
+        #
+        global win_pattern
         key = ",".join([each.key for each in mahjongcards])
-        if key in self.__win_pattern__:
+        if key in win_pattern:
             return True
         else:
             return False
-
+            
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
             newinstance = MahjongCard(self.get_key())
