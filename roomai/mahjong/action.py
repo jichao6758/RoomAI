@@ -6,6 +6,7 @@ from MahjongInfo import *
 from MahjongUtil import *
 import sys
 sys.path.append("d:/RoomAI/")
+sys.path.append("/Users/jichao/Desktop/RoomAI")
 import roomai.common
 from roomai.common import AbstractPlayer
 class RandomPlayer(AbstractPlayer):
@@ -29,7 +30,7 @@ class RandomPlayer(AbstractPlayer):
 if __name__ == '__main__':
     players = [RandomPlayer() for i in range(4)]
     env = MahjongEnv()
-    print env.__params__
+    #print env.__params__
 
     scores = MahjongEnv.compete(env, players)
     # print scores

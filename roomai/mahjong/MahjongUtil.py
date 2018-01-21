@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*- 
 #import roomai.common
 import copy
+import functools
 point_str_to_rank           = {'1':0, '2':1, '3':2, '4':3,  '5':4,  '6':5,  '7':6,  '8':7,\
                                '9':8}
 point_rank_to_str           = {0:'1', 1:'2', 2:'3', 3:'4', 4:'5',  5:'6',  6:'7',   7:'8',\
@@ -15,11 +16,7 @@ suit_str_to_rank            = {'Dot':0, 'Bamboo':1, 'Character':2, 'EastWind':3,
 suit_rank_to_str            = {0:'Dot', 1:'Bamboo', 2: 'Character', 3:'EastWind', 4:'SouthWind', \
                                 5:'WestWind', 6:'NorthWind', 7:'Red', 8:'Green', \
                                 9:'WhiteDragon'}
-win_pattern = []
-if len(win_pattern) == 0:
-    #fopen = open("result.txt","r")
-    for each in open("D:/RoomAI/roomai/mahjong/result.txt","r"):
-        win_pattern.append(each)
+
 
 class StateSpace:
     """
@@ -42,7 +39,7 @@ class MahjongCard(object):
                 point1 = point_str_to_rank[point]
             suit1  = suit
             if isinstance(suit, str):
-                print suit
+                #print suit
                 suit1 = suit_str_to_rank[suit]
 
         self.__point_str__  = point_rank_to_str[point1]
@@ -50,7 +47,7 @@ class MahjongCard(object):
         self.__point_rank__ = point1
         self.__suit_rank__  = suit1
         self.__key__        = "%s_%s"%(self.__point_str__, self.__suit_str__)
-        self.__win_pattern__ = []
+        #self.__win_pattern__ = []
     def __get_point_str__(self):
         return self.__point_str__
     point = property(__get_point_str__, doc="The point of the mahjong card")
@@ -170,7 +167,7 @@ class MahjongCard(object):
         pr2 = mahjongcard2.point_rank
         pr3 = mahjongcard3.point_rank
 
-        if suit1 == suit2 == suit3 and pr2 * 2 == pr1 + pr3 :
+        if suit1 == suit2 == suit3 and pr2 - pr1 == pr3 - pr2 == 1 :
             return True
         else:
             False
@@ -200,7 +197,12 @@ class MahjongCard(object):
         # pair win 
         #
         global win_pattern
+        #print len(win_pattern)
+
         key = ",".join([each.key for each in mahjongcards])
+        #print key
+        #print win_pattern[0]
+        #assert 0
         if key in win_pattern:
             return True
         else:
@@ -208,10 +210,11 @@ class MahjongCard(object):
             
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
-            newinstance = MahjongCard(self.get_key())
-        newinstance.point_str = self.point_str
-        newinstance.suit_str  = self.suit_str
-        newinstance.String    = self.String
+            newinstance = MahjongCard(self.key)
+        newinstance.__point_str__  = self.point
+        newinstance.__suit_str__   = self.suit
+        newinstance.__suit_rank__  = self.suit_rank
+        newinstance.__point_rank__ = self.point_rank
         return newinstance
 
 AllMahjongCards = dict()
@@ -223,6 +226,27 @@ for i in range(0,4):
     for suit in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
         point = "1"
         AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
+
+win_pattern = []
+if len(win_pattern) == 0:
+    #fwrite = open("/Users/jichao/Desktop/RoomAI/roomai/mahjong/result_sort.txt","w")
+    #fopen = open("result.txt","r")
+    #for each in open("D:/RoomAI/roomai/mahjong/result.txt","r"):
+    for each in open("/Users/jichao/Desktop/RoomAI/roomai/mahjong/result_sort.txt","r"):
+        #cards = [MahjongCard(each_card.split("_")[1],each_card.split("_")[0]) for each_card in each.strip().split(",")]
+        #print cards[0].key
+        #cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
+        
+        #card_pattern = ",".join([card.key for card in cards])
+        #print card_pattern
+        #assert 0
+        #win_pattern.append(card_pattern)
+        #fwrite.write(card_pattern + "\n")
+        win_pattern.append(each.strip())
+    #fwrite.close()
+    #print len(win_pattern)
+    #print win_pattern[0]
+    #assert 0
 
 
 

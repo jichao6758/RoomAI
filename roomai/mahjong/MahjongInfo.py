@@ -25,63 +25,53 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         self.__remaining_card_num__     = None    # remaining_car_num
         self.__out_of_card__            = None    # out of card
         self.__win_by_discard__         = None    # the id of who discard 
-        @property
-        def dealer_id(self):
-            return self.__dealer_id
+        self.__players_cards_num__      = None   # the list of number of players` remaining cards 
+        self.__discard_player__         = None   # the number of players who is the lastest discard
+        self.__players_action__         = None 
+        self.__players_conkong__        = None
+        self.__is_terminal__            = None
+        self.__discard_player__         = None
+        self.__discard_card__           = None
 
-        @property
-        def num_players(self):
-            return self.__num_players
-
-        @property
-        def remaining_card_num(self):
-            return self.__remaining_card_num
-
-        @property
-        def previous_id(self):
-            return self.__previous_id
-
-        @property
-        def previous_action(self):
-            return self.__previous_action
-
-        '''[summary]
-        
-        state of players
-        '''
-        
-        
-
-        self.__players_cards_num__    = None   # the list of number of players` remaining cards 
-        self.__discard_player__       = None   # the number of players who is the lastest discard
-        self.__players_chow__         = None 
-        self.__players_pong__         = None
-        self.__players_kong__         = None
-        self.__players_conkong__      = None
-
-        @property
-        def players_cards_num(self):
-            return self.__players_cards_num
-
-        @property
-        def players_ready_hand(self):
-            return self.__players_ready_hand
-
-        @property
-        def players_chow(self):
-            return self.__players_chow
-
-        @property
-        def players_pong(self):
-            return self.__players_pong
-
-        @property 
-        def players_kong(self):
-            return self.__players_kong
-
-        @property
-        def players_conkong(self):
-            return self.__players_conkong
+    @property
+    def dealer_id(self):
+        return self.__dealer_id__
+    @property
+    def num_players(self):
+        return self.__num_players__
+    @property
+    def turn(self):
+        return self.__turn__
+    @property
+    def remaining_card_num(self):
+        return self.__remaining_card_num__
+    @property
+    def previous_id(self):
+        return self.__previous_id__
+    @property
+    def previous_action(self):
+        return self.__previous_action__
+    @property
+    def players_cards_num(self):
+        return self.__players_cards_num__
+    @property
+    def players_ready_hand(self):
+        return self.__players_ready_hand__
+    @property
+    def players_chow(self):
+        return self.__players_chow__
+    @property
+    def players_pong(self):
+        return self.__players_pong__
+    @property 
+    def players_kong(self):
+        return self.__players_kong__
+    @property
+    def players_conkong(self):
+        return self.__players_conkong__
+    @property
+    def discard_player(self):
+        return self.__discard_player__
 
     def __deepcopy__(self, memodict={}):
         '''[summary]
@@ -150,8 +140,8 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
         self.__id__                 =    0
         self.__hand_cards__         =    []
         self.__available_actions__  =    dict() 
-        self.__show_cards__         =    dict()
         self.__discard__            =    []
+        self.__conkong__            =    []
 
     @property
     def id(self):
@@ -181,6 +171,8 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
                 continue
             self.__hand_cards__.append(tmp[i])
 
+    def __get_available_actions__(self):  return self.__available_actions__
+    available_actions = property(__get_available_actions__, doc="All valid actions for the player expected to take an action. The person state w.r.t no-current player contains empty available_actions")
 
     def __deepcopy__(self, memodict={}):
         copyinstance    = MahjongPersonState()
