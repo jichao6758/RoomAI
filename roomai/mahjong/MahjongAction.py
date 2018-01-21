@@ -24,7 +24,7 @@ class MahjongAction(roomai.common.AbstractAction):
     Null            = 'Null'
 
     
-    def __init__(self, key):
+    def __init__(self, key,card_list):
         opt_list   = key.strip().split("_")
         self.__option__  = opt_list[0]
         '''
@@ -35,6 +35,7 @@ class MahjongAction(roomai.common.AbstractAction):
         self.__card__       = "_".join(opt_list[2:])
         self.__key__        = "%s_%s_%s"%(self.__option__, self.__source__,self.__card__)
         self.effective      = False   
+        self.__card_list__  = card_list
     @property
     def key(self):
         return self.__key__
@@ -61,9 +62,21 @@ class MahjongAction(roomai.common.AbstractAction):
             AllMahjongActions[self.key] = MahjongAction(self.key)
         return AllMahjongActions[self.key]
     @classmethod
-    def lookup(cls,key):
+    def lookup(cls,key,card_list):
+        #print key
+        #print card_list
         if key not in AllMahjongActions:
-            AllMahjongActions[key] = MahjongAction(key)
+            AllMahjongActions[key] = MahjongAction(key,card_list)
+            if card_list != AllMahjongActions[key].__card_list__:
+                assert 0
+        else:
+            #print "lookup"
+            #print key
+            #print card_list
+            #print AllMahjongActions[key].__card_list__
+            #print "end"
+            if card_list != AllMahjongActions[key].__card_list__:
+                assert 0
         return AllMahjongActions[key]
 
 AllMahjongActions = dict()

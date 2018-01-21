@@ -17,6 +17,7 @@ from MahjongInfo import *
 from MahjongAction import *
 import functools
 
+step = 0
 class MahjongEnv(roomai.common.AbstractEnv):
 
     @classmethod
@@ -53,14 +54,22 @@ class MahjongEnv(roomai.common.AbstractEnv):
 
         self.__params__["num_players"] = params["num_players"]
         self.__params__["allcards"] = []
-        for x in xrange(4):
-            for y in xrange(9):
-                for z in xrange(3):
-                    self.__params__["allcards"].append(MahjongCard(y,z))
-            for m in range(4,9):
-                self.__params__["allcards"].append(MahjongCard(m,0))
 
+        for y in xrange(9):
+            for z in xrange(3):
+                self.__params__["allcards"].append(MahjongCard(y,z))
+        for m in range(4,9):
+                self.__params__["allcards"].append(MahjongCard(0,m))
+
+        for i in range(0,2):
+            self.__params__["allcards"]  = self.__params__["allcards"] + self.__params__["allcards"]
+
+        #
+        #print ",".join(["%s_%s" %(str(each),each.key) for each in self.__params__["allcards"]])
+
+        #assert 0
         random.shuffle(self.__params__["allcards"])
+        #print self.__params__["allcards"]
         if "record_history" in params:
             self.__params__["record_history"] = params["record_history"]
         else:
@@ -82,6 +91,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
         self.public_state.__discard_player__       = None
         self.public_state.__discard__              = None
         self.public_state.__is_terminal__          = False
+        self.public_state.__who_is_win__           = -1
         ## private info
         self.private_state              = MahjongPrivateState()
         self.private_state.__keep_cards__           = self.__params__["allcards"][self.__params__["num_players"]*13 + 1:]
@@ -116,14 +126,19 @@ class MahjongEnv(roomai.common.AbstractEnv):
         public  = self.public_state
         person = self.person_states
         private = self.private_state
+        #global step
+        #step = step + 1
+        #print "###%s" %step
+
         """[summary]
         动作为胡,直接game_over,计算得分
         """
         if action.effective == True and action.option == MahjongAction.Win:
             public.__previous_id__      = public.__turn__
             public.__previous_action__  = action
-            public.__is_terminal__      = true
-            public.__scores__             = self.__compute_scores__()
+            public.__is_terminal__      = True
+            public.__scores__           = self.__compute_scores__()
+            public.__who_is_win__       = public.__turn__
             self.__gen_history__()
             return self.__gen_infos__(),public,person,private
         
@@ -134,33 +149,64 @@ class MahjongEnv(roomai.common.AbstractEnv):
             public.__previous_id__      = public.__turn__
             public.__previous_action__  = action
             
-            action_cards = action.__card__.split(":")
-            print len(person[public.__turn__].__hand_cards__)
+            action_cards = action.__card_list__
+            #print "start"
+            #print "action"
+            #print action_cards
+            #print "discard"
+            #print public.__discard_card__
+            #print public.__turn__
+            #print len(person[public.__turn__].__hand_cards__)
+            #print person[public.__turn__].__hand_cards__
+            #print 
+            to_del = {}
             for each in action_cards:
-                if action.option != MahjongAction.Discard and each == public.__discard_card__.key:
-                    continue
-                person[public.__turn__].__hand_cards__.remove(MahjongCard(each))
+                if each.key not in to_del.keys():
+                    to_del[each] = 1
+                else:
+                    to_del[each] = to_del[each.key] + 1
+            if action.option != action.Discard:
+                to_del[public.__discard_card__] = 0
+                person[public.__turn__].__discard__ = person[public.__turn__].__discard__ + action_cards
+                #print person[public.__turn__].__discard__
+                #assert 0
+            #print to_del
+            a = len(person[public.__turn__].__hand_cards__)
+            #print a
+            #print to_del
+            #print action.option
+            #print action_cards
+            #print person[public.__turn__].__hand_cards__
+            person[public.__turn__].__del_card__(to_del)
+            b = len(person[public.__turn__].__hand_cards__)
+
+            if a == b:
+                assert 0
+            #assert 0
             '''[summary]
             
             将碰的牌记录到public_state
             '''
             if action.option in (MahjongAction.Pong,MahjongAction.Chow,MahjongAction.Kong,MahjongAction.ConKong):
+                # 如果动作是非杠或者暗杠
                 if action.option != MahjongAction.ConKong:
-                    public.__players_pong__.append((action.option,public.__discard_player__,public.__turn__,action.__card__))
+                    public.__players_action__.append((action.option,public.__discard_player__,public.__turn__,action.__card__))
                 else:
                     public.__players_conkong__.append(public.__turn__)
                     person[public.__turn__].__conkong__.append(action.__card__)
                 if  action.option in (MahjongAction.Kong,MahjongAction.ConKong):
-                    person[public.__turn__].__add_card__(private.__keep_cards__.pop())
-            '''[summary]
-            
-            将吃的牌记录到public_state
-            '''
-            person[public.__turn__].__discard__           = []
-            public.__turn__                                = public.__turn__
-            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
-            self.__gen_history__()
-            return self.__gen_infos__(),public,person,private
+                    if len(private.__keep_cards__) > 0:
+                        person[public.__turn__].__add_card__(private.__keep_cards__.pop())
+                    else:
+                        public.__is_terminal__ = True
+                        public.__scores__           = self.__compute_scores__()
+                person[public.__turn__].__discard__           = []
+                public.__turn__                               = public.__turn__
+                person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
+                #
+                #print person[public.__turn__].__available_actions__
+                self.__gen_history__()
+                return self.__gen_infos__(),public,person,private
 
 #        """[summary]
 #        动作为杠
@@ -190,7 +236,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
 #            return self.__gen_infos__(),public,person,private
             if action.option == MahjongAction.Discard:
                 public.__discard_player__ = public.__turn__
-                public.__discard_card__   = MahjongCard(action.__card__)
+                public.__discard_card__   = action.__card_list__[0]
         #assert 0
         #判断是不是有人胡牌
         i = (public.__turn__ + 1) % self.__params__["num_players"]
@@ -223,10 +269,21 @@ class MahjongEnv(roomai.common.AbstractEnv):
             public.__turn__ = (public.__discard_player__ + 1) % self.__params__["num_players"]
         else:
             public.__turn__ = (public.__turn__ + 1) % self.__params__["num_players"]
+
         available_actions = self.available_actions_chow(public,person[public.__turn__])
         if len(available_actions) == 0:
-            person[public.__turn__].__add_card__(private.__keep_cards__.pop())
-            available_actions = self.available_actions(public,person[public.__turn__])
+            if len(private.__keep_cards__) != 0:
+                person[public.__turn__].__add_card__(private.__keep_cards__.pop())
+                #print "hand_cards"
+                #print person[public.__turn__].__hand_cards__
+                #print len(person[public.__turn__].__hand_cards__)
+                available_actions = self.available_actions(public,person[public.__turn__])
+                #print "action"
+                #for each in available_actions:
+                #    print available_actions[each].__card_list__
+            else:
+                public.__is_terminal__ = True
+                public.__scores__           = self.__compute_scores__()
         person[public.__turn__].__available_actions__ = available_actions
         self.__gen_history__()
         return self.__gen_infos__(),public,person,private
@@ -246,18 +303,23 @@ class MahjongEnv(roomai.common.AbstractEnv):
         turn    = public.turn
         key_actions = dict()
         #available_actions = {}
-        if MahjongCard.isWin(person.hand_cards) == True:
+        cards = person.__hand_cards__ + person.__discard__
+        cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
+        if (len(cards) > 14):
+            assert 0
+        if MahjongCard.isWin(cards) == True:
             key = "%s_%s_%s" %(MahjongAction.Win,0,":".join([each.key for each in cards]))
-            key_actions[key] = MahjongAction.lookup(key)
+            key_actions[key] = MahjongAction.lookup(key,cards)
         for i in range(len(person.hand_cards)):
              key = "%s_%s_%s" %(MahjongAction.Discard,0,person.hand_cards[i].key)
-             key_actions[key] = MahjongAction.lookup(key)
+             key_actions[key] = MahjongAction.lookup(key,[person.hand_cards[i]])
 
         i = 0
         while i < len(person.hand_cards) - 3:
             if MahjongCard.isQuadruple(person.hand_cards[i],person.hand_cards[i + 1],person.hand_cards[i + 2],person.hand_cards[i + 3]) == True:
-                key = "%s_%s_%s" %(MahjongAction.ConKong,0,":".join([person.hand_cards[i].key,person.hand_cards[i + 1].key,person.hand_cards[i + 2].key,person.hand_cards[i + 3].key]))
-                key_actions[key] = MahjongAction.lookup(key)
+                cards_list = [person.hand_cards[i],person.hand_cards[i + 1],person.hand_cards[i + 2],person.hand_cards[i + 3]]
+                key = "%s_%s_%s" %(MahjongAction.ConKong,0,":".join([each.key for each in cards_list]))
+                key_actions[key] = MahjongAction.lookup(key,cards_list)
                 i = i + 4
             else:
                 i = i + 1
@@ -274,9 +336,10 @@ class MahjongEnv(roomai.common.AbstractEnv):
         for i in range(len(person.hand_cards) - 2):
             if person.hand_cards[i].key == discard.key:
                 if MahjongCard.isQuadruple(discard,person.hand_cards[i],person.hand_cards[i + 1],person.hand_cards[i + 2]) == True:
-                   key = "%s_%s_%s" %(MahjongAction.Kong,turn,":".join([discard.key,person.hand_cards[i].key,person.hand_cards[i + 1].key,person.hand_cards[i + 2].key]))
-                   key_actions[key] = MahjongAction.lookup(key)
-                   return key_actions
+                    cards_list = [discard,person.hand_cards[i],person.hand_cards[i + 1],person.hand_cards[i + 2]]
+                    key = "%s_%s_%s" %(MahjongAction.Kong,turn,":".join([each.key for each in cards_list]))
+                    key_actions[key] = MahjongAction.lookup(key,cards_list)
+                    return key_actions
                 else:
                     return key_actions
 
@@ -293,12 +356,13 @@ class MahjongEnv(roomai.common.AbstractEnv):
             return key_actions
         for i in range(len(person.hand_cards) - 1):
             if MahjongCard.isSequence(discard,person.hand_cards[i],person.hand_cards[i + 1]) == True:
+                cards_list = [discard,person.hand_cards[i],person.hand_cards[i + 1]]
                 isExistChow = True
-                key = "%s_%s_%s" %(MahjongAction.Chow,turn,":".join([discard.key,person.hand_cards[i].key,person.hand_cards[i + 1].key]))
-                key_actions[key] = MahjongAction.lookup(key)
-                print "in"
-                print key
-                print "out"
+                key = "%s_%s_%s" %(MahjongAction.Chow,turn,":".join([each.key for each in cards_list]))
+                key_actions[key] = MahjongAction.lookup(key,cards_list)
+                #print "in"
+                #print key
+                #print "out"
                 isExistChow = False
             # elif MahjongCard.isSequence(person.hand_cards[i],discard,person.hand_cards[i + 1]) == True:
             #     isExistChow = True
@@ -316,16 +380,21 @@ class MahjongEnv(roomai.common.AbstractEnv):
         discard = public.__discard_card__
         cards = []
         isInsert = False
-        for each in person.hand_cards:
-            if MahjongCard.compare(each,discard) < 0 or isInsert == True:
-                cards.append(each.__deepcopy__())
-            elif isInsert == False:
-                cards.append(discard.__deepcopy__())
-                cards.append(each.__deepcopy__())
-                isInsert == True
+        cards = person.__hand_cards__ + person.__discard__
+        cards.append(discard)
+        cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
+        if (len(cards) > 14):
+            assert 0
+        #for each in person.hand_cards:
+        #    if MahjongCard.compare(each,discard) < 0 or isInsert == True:
+        #        cards.append(each)
+        #    elif isInsert == False:
+        #        cards.append(discard)
+        #        cards.append(each)
+        #        isInsert == True
         if MahjongCard.isWin(cards) == True:
             key = "%s_%s_%s" %(MahjongAction.Win,turn,":".join([each.key for each in cards]))
-            key_actions[key] = MahjongAction.lookup(key)
+            key_actions[key] = MahjongAction.lookup(key,cards)
         return key_actions
     @classmethod
     def compete(cls, env, players):
@@ -346,18 +415,19 @@ class MahjongEnv(roomai.common.AbstractEnv):
             turn = public.turn
             action = players[turn].take_action()
 
-            print action.key
+            #print action.key
             #assert 0
             infos,public,persons,private = env.forward(action)
              
             for i in range(env.__params__["num_players"]):
                 players[i].receive_info(infos[i])
-
+        print public.scores
         return public.scores
 
     def __compute_scores__(self):
-        scores = [-1 for i in rage(self.__params__["num_players"])]
-        scores[self.public_state.turn]  = 100
+        scores = [-1 for i in range(self.__params__["num_players"])]
+        if self.public_state.__who_is_win__ != -1:
+            scores[self.public_state.__who_is_win__]  = 100
         return scores
      
 if __name__ == '__main__':

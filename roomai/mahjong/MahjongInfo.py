@@ -2,6 +2,7 @@
 #coding=utf8
 import roomai.common
 from roomai.mahjong import MahjongCard
+import functools
 class MahjongPublicState(roomai.common.AbstractPublicState):
     """[summary]
     
@@ -27,8 +28,8 @@ class MahjongPublicState(roomai.common.AbstractPublicState):
         self.__win_by_discard__         = None    # the id of who discard 
         self.__players_cards_num__      = None   # the list of number of players` remaining cards 
         self.__discard_player__         = None   # the number of players who is the lastest discard
-        self.__players_action__         = None 
-        self.__players_conkong__        = None
+        self.__players_action__         = [] 
+        self.__players_conkong__        = []
         self.__is_terminal__            = None
         self.__discard_player__         = None
         self.__discard_card__           = None
@@ -153,23 +154,24 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
 
     def __add_card__(self,c):
         self.__hand_cards__.append(c)
-
-        for j in range(len(self.__hand_cards__)-1,0,-1):
-            if MahjongCard.compare(self.__hand_cards__[j - 1], self.__hand_cards__[j]) > 0:
-                tmp = self.__hand_cards__[j]
-                self.__hand_cards__[j] = self.__hand_cards__[j-1]
-                self.__hand_cards__[j-1] = tmp
-            else:
-                break
+        self.__hand_cards__.sort(key = functools.cmp_to_key(MahjongCard.compare))
+    #    for j in range(len(self.__hand_cards__)-1,0,-1):
+    #        if MahjongCard.compare(self.__hand_cards__[j - 1], self.__hand_cards__[j]) > 0:
+    #            tmp = self.__hand_cards__[j]
+    #            self.__hand_cards__[j] = self.__hand_cards__[j-1]
+    #            self.__hand_cards__[j-1] = tmp
+    #        else:
+    #            break
 
 
     def __del_card__(self,c):
-        tmp = self.__hand_cards__
-        self.__hand_cards__ = []
-        for i in range(len(tmp)):
-            if c.key == tmp[i].key:
+        new_list = []
+        for i in range(len(self.__hand_cards__)):
+            if self.__hand_cards__[i] in c.keys() and c[self.__hand_cards__[i]] > 0:
+                c[self.__hand_cards__[i]] = c[self.__hand_cards__[i]] - 1
                 continue
-            self.__hand_cards__.append(tmp[i])
+            new_list.append(self.__hand_cards__[i])
+        self.__hand_cards__ = new_list
 
     def __get_available_actions__(self):  return self.__available_actions__
     available_actions = property(__get_available_actions__, doc="All valid actions for the player expected to take an action. The person state w.r.t no-current player contains empty available_actions")

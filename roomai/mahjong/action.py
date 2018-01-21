@@ -19,7 +19,7 @@ class RandomPlayer(AbstractPlayer):
 
     def take_action(self):
         import random
-        idx = int(random.random() * len(self.available_actions))
+        idx = 0 #int(random.random() * len(self.available_actions))
         action = list(self.available_actions.values())[idx]
         action.effective = True
         return action
