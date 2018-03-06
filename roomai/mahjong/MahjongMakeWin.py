@@ -10,7 +10,7 @@ def process_fun(card_list,start):
     #print key
     global i 
     i = i + 1 
-    for each_key in mahjong_map.keys():
+    for each_key in mahjong_map:
         if mahjong_map[each_key] > 4:
             return
             #print mahjong_map
@@ -20,7 +20,7 @@ def process_fun(card_list,start):
         #print card_list
         global all_list
         #print card_list
-        if ",".join(card_list) not in all_list.keys():
+        if ",".join(card_list) not in all_list:
             print ",".join(card_list)
             all_list[",".join(card_list)] = 0
             assert 0

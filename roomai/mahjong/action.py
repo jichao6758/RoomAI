@@ -4,6 +4,7 @@ from MahjongAction import MahjongAction
 from MahjongEnv import MahjongEnv
 from MahjongInfo import *
 from MahjongUtil import *
+import time
 import sys
 sys.path.append("d:/RoomAI/")
 sys.path.append("/Users/jichao/Desktop/RoomAI")
@@ -19,7 +20,7 @@ class RandomPlayer(AbstractPlayer):
 
     def take_action(self):
         import random
-        idx = 0 #int(random.random() * len(self.available_actions))
+        idx = int(random.random() * len(self.available_actions))
         action = list(self.available_actions.values())[idx]
         action.effective = True
         return action
@@ -28,9 +29,12 @@ class RandomPlayer(AbstractPlayer):
         pass
 
 if __name__ == '__main__':
-    players = [RandomPlayer() for i in range(4)]
-    env = MahjongEnv()
+    print time.clock()
+    for i in range(100):
+        players = [RandomPlayer() for i in range(4)]
+        env = MahjongEnv()
     #print env.__params__
 
-    scores = MahjongEnv.compete(env, players)
+        scores = MahjongEnv.compete(env, players)
+    print time.clock()
     # print scores

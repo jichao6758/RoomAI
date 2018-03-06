@@ -146,7 +146,7 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
 
     @property
     def id(self):
-        return tuple(self.__id)
+        return tuple(self.__id__)
 
     @property    
     def hand_cards(self):
@@ -167,11 +167,14 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
     def __del_card__(self,c):
         new_list = []
         for i in range(len(self.__hand_cards__)):
-            if self.__hand_cards__[i] in c.keys() and c[self.__hand_cards__[i]] > 0:
+            if self.__hand_cards__[i] in c and c[self.__hand_cards__[i]] > 0:
                 c[self.__hand_cards__[i]] = c[self.__hand_cards__[i]] - 1
                 continue
             new_list.append(self.__hand_cards__[i])
+        #print len(self.__hand_cards__)
         self.__hand_cards__ = new_list
+        #print len(new_list)
+        #assert 0
 
     def __get_available_actions__(self):  return self.__available_actions__
     available_actions = property(__get_available_actions__, doc="All valid actions for the player expected to take an action. The person state w.r.t no-current player contains empty available_actions")

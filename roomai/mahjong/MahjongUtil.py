@@ -101,8 +101,8 @@ class MahjongCard(object):
             :return: the same true others false
 
         '''
-        key1 = mahjongcard1.key
-        key2 = mahjongcard2.key
+        key1 = mahjongcard1.__key__
+        key2 = mahjongcard2.__key__
 
         if key1 == key2:
             return True
@@ -119,9 +119,9 @@ class MahjongCard(object):
             :return: the same true others false
 
         '''
-        key1 = mahjongcard1.key
-        key2 = mahjongcard2.key
-        key3 = mahjongcard3.key
+        key1 = mahjongcard1.__key__
+        key2 = mahjongcard2.__key__
+        key3 = mahjongcard3.__key__
 
         if key1 == key2 == key3:
             return True
@@ -139,10 +139,10 @@ class MahjongCard(object):
             :return: the same true others false
 
         '''
-        key1 = mahjongcard1.key
-        key2 = mahjongcard2.key
-        key3 = mahjongcard3.key
-        key4 = mahjongcard4.key
+        key1 = mahjongcard1.__key__
+        key2 = mahjongcard2.__key__
+        key3 = mahjongcard3.__key__
+        key4 = mahjongcard4.__key__
 
         if key1 == key2 == key3 == key4:
             return True
@@ -159,13 +159,13 @@ class MahjongCard(object):
             :return: the sequence true others false
 
         '''
-        suit1 = mahjongcard1.suit
-        suit2 = mahjongcard2.suit
-        suit3 = mahjongcard3.suit
+        suit1 = mahjongcard1.__suit_rank__
+        suit2 = mahjongcard2.__suit_rank__
+        suit3 = mahjongcard3.__suit_rank__
 
-        pr1 = mahjongcard1.point_rank
-        pr2 = mahjongcard2.point_rank
-        pr3 = mahjongcard3.point_rank
+        pr1 = mahjongcard1.__point_rank__
+        pr2 = mahjongcard2.__point_rank__
+        pr3 = mahjongcard3.__point_rank__
 
         if suit1 == suit2 == suit3 and pr2 - pr1 == pr3 - pr2 == 1 :
             return True
@@ -183,14 +183,22 @@ class MahjongCard(object):
         :return: A number, which is >0 when the poker card1 has the higher rank than the poker card2, =0 when their share the same rank, <0 when the poker card1 has the lower rank than the poker card2
         
         '''
-        pr1 = mahjongcard1.suit
-        pr2 = mahjongcard2.suit
+        #key = 0
+        #for i in range(10):
+        #    key = key + (mahjongcard1.suit_rank - mahjongcard2.suit_rank)
+        return  (mahjongcard1.__suit_rank__ - mahjongcard2.__suit_rank__) * 10  + (mahjongcard1.__point_rank__ - mahjongcard1.__point_rank__)
+        #pr1 = mahjongcard1.suit
+        #pr2 = mahjongcard2.suit
 
+        #value1 = mahjongcard1.suit_rank  * 100 + mahjongcard1.point_rank
+#
+        #value2 = mahjongcard2.suit_rank  * 100 + mahjongcard1.point_rank
 
-        if pr1 == pr2:
-            return mahjongcard1.point_rank - mahjongcard2.point_rank
-        else:
-            return mahjongcard1.suit_rank - mahjongcard2.suit_rank
+        #return value1 - value2
+        #if pr1 == pr2:
+        #    return mahjongcard1.point_rank - mahjongcard2.point_rank
+        #else:
+        #    return mahjongcard1.suit_rank - mahjongcard2.suit_rank
     @classmethod
     def isWin(cls,mahjongcards):
         # 
@@ -199,10 +207,11 @@ class MahjongCard(object):
         global win_pattern
         #print len(win_pattern)
 
-        key = ",".join([each.key for each in mahjongcards])
+        key = ",".join([each.__key__ for each in mahjongcards])
         #print key
         #print win_pattern[0]
         #assert 0
+        #return False
         if key in win_pattern:
             return True
         else:
@@ -211,23 +220,25 @@ class MahjongCard(object):
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
             newinstance = MahjongCard(self.key)
-        newinstance.__point_str__  = self.point
-        newinstance.__suit_str__   = self.suit
-        newinstance.__suit_rank__  = self.suit_rank
-        newinstance.__point_rank__ = self.point_rank
+        newinstance.__point_str__  = self.__point_str__
+        newinstance.__suit_str__   = self.__suit_str__
+        newinstance.__suit_rank__  = self.__suit_rank__
+        newinstance.__point_rank__ = self.__point_rank__
         return newinstance
 
 AllMahjongCards = dict()
 for i in range(0,4):
     for point in point_str_to_rank:
-        if point not in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
-            for suit in suit_str_to_rank:
+        for suit in suit_str_to_rank:
+            if suit not in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
                 AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
     for suit in ['EastWind','SouthWind','WestWind','NorthWind','Red','Green','WhiteDragon']:
         point = "1"
         AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
 
-win_pattern = []
+
+
+win_pattern = {}
 if len(win_pattern) == 0:
     #fwrite = open("/Users/jichao/Desktop/RoomAI/roomai/mahjong/result_sort.txt","w")
     #fopen = open("result.txt","r")
@@ -242,7 +253,8 @@ if len(win_pattern) == 0:
         #assert 0
         #win_pattern.append(card_pattern)
         #fwrite.write(card_pattern + "\n")
-        win_pattern.append(each.strip())
+        #win_pattern.append(each.strip())
+        win_pattern[each] = 0
     #fwrite.close()
     #print len(win_pattern)
     #print win_pattern[0]

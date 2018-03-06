@@ -25,7 +25,7 @@ class MahjongAction(roomai.common.AbstractAction):
 
     
     def __init__(self, key,card_list):
-        opt_list   = key.strip().split("_")
+        opt_list   = key.split("_")
         self.__option__  = opt_list[0]
         '''
         source:-1 表示来源于环境 0 表示来源于自己手牌 其他表示来源于其他玩家对应的id

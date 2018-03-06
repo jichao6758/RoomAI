@@ -10,11 +10,12 @@ sys.path.append("d:/RoomAI/")
 sys.path.append("/Users/jichao/Desktop/RoomAI")
 import roomai.common
 import logging
-
+import time
 from roomai.common import Info
 from roomai.mahjong import MahjongCard
 from MahjongInfo import *
 from MahjongAction import *
+from MahjongUtil import *
 import functools
 
 step = 0
@@ -54,16 +55,17 @@ class MahjongEnv(roomai.common.AbstractEnv):
 
         self.__params__["num_players"] = params["num_players"]
         self.__params__["allcards"] = []
-
-        for y in xrange(9):
-            for z in xrange(3):
-                self.__params__["allcards"].append(MahjongCard(y,z))
-        for m in range(4,9):
+        if "allcards" not in params:
+            for y in xrange(9):
+                for z in xrange(3):
+                    self.__params__["allcards"].append(MahjongCard(y,z))
+            for m in range(4,9):
                 self.__params__["allcards"].append(MahjongCard(0,m))
 
-        for i in range(0,2):
-            self.__params__["allcards"]  = self.__params__["allcards"] + self.__params__["allcards"]
-
+            for i in range(0,2):
+                self.__params__["allcards"]  = self.__params__["allcards"] + self.__params__["allcards"]
+        else:
+            self.__params__["allcards"] = params["allcards"]
         #
         #print ",".join(["%s_%s" %(str(each),each.key) for each in self.__params__["allcards"]])
 
@@ -161,27 +163,35 @@ class MahjongEnv(roomai.common.AbstractEnv):
             #print 
             to_del = {}
             for each in action_cards:
-                if each.key not in to_del.keys():
+                if each not in to_del:
                     to_del[each] = 1
                 else:
-                    to_del[each] = to_del[each.key] + 1
+                    to_del[each] = to_del[each] + 1
             if action.option != action.Discard:
-                to_del[public.__discard_card__] = 0
+                #print action.option
+                if public.__discard_card__ in to_del:
+                    to_del[public.__discard_card__] = to_del[public.__discard_card__] - 1
                 person[public.__turn__].__discard__ = person[public.__turn__].__discard__ + action_cards
                 #print person[public.__turn__].__discard__
                 #assert 0
             #print to_del
-            a = len(person[public.__turn__].__hand_cards__)
+            #a = len(person[public.__turn__].__hand_cards__)
             #print a
             #print to_del
             #print action.option
             #print action_cards
-            #print person[public.__turn__].__hand_cards__
+            #before = person[public.__turn__].__hand_cards__
             person[public.__turn__].__del_card__(to_del)
-            b = len(person[public.__turn__].__hand_cards__)
-
+            #b = len(person[public.__turn__].__hand_cards__)
+            '''
             if a == b:
+                print action_cards
+                print action.option
+                print before
+                print to_del
+                print person[public.__turn__].__hand_cards__
                 assert 0
+            '''
             #assert 0
             '''[summary]
             
@@ -320,7 +330,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 cards_list = [person.hand_cards[i],person.hand_cards[i + 1],person.hand_cards[i + 2],person.hand_cards[i + 3]]
                 key = "%s_%s_%s" %(MahjongAction.ConKong,0,":".join([each.key for each in cards_list]))
                 key_actions[key] = MahjongAction.lookup(key,cards_list)
-                i = i + 4
+                i = i + 4    
             else:
                 i = i + 1
         return key_actions
@@ -406,7 +416,17 @@ class MahjongEnv(roomai.common.AbstractEnv):
         :return: the winer
         '''
         num_players = len(players)
-        infos, public, person, private = env.init({"num_players":num_players})
+        global AllMahjongCards
+        #print AllMahjongCards
+        allcards = []
+
+        for each in AllMahjongCards:
+            allcards.append(AllMahjongCards[each])
+        for i in range(2):
+            allcards = allcards + allcards
+        #print len(allcards)
+        #
+        infos, public, person, private = env.init({"num_players":num_players,"allcards":allcards})
         #assert 0
         for i in range(public.num_players):
             players[i].receive_info(infos[i])
@@ -422,6 +442,7 @@ class MahjongEnv(roomai.common.AbstractEnv):
             for i in range(env.__params__["num_players"]):
                 players[i].receive_info(infos[i])
         print public.scores
+        #print time.clock()
         return public.scores
 
     def __compute_scores__(self):
