@@ -6,8 +6,8 @@ import copy
 #from roomai.common import *
 #import roomai
 import sys
-sys.path.append("d:/RoomAI/")
-sys.path.append("/Users/jichao/Desktop/RoomAI")
+#sys.path.append("d:/RoomAI/")
+sys.path.append("/Users/jichao/Documents/RoomAi/RoomAI/")
 import roomai.common
 import logging
 import time
@@ -66,6 +66,8 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 self.__params__["allcards"]  = self.__params__["allcards"] + self.__params__["allcards"]
         else:
             self.__params__["allcards"] = params["allcards"]
+        # print [each.key for each in self.__params__["allcards"]]
+        # assert 0
         #
         #print ",".join(["%s_%s" %(str(each),each.key) for each in self.__params__["allcards"]])
 
@@ -149,18 +151,8 @@ class MahjongEnv(roomai.common.AbstractEnv):
         """
         if action.effective == True: #and (action.option == MahjongAction.Pong or action.option == MahjongAction.Chow):
             public.__previous_id__      = public.__turn__
-            public.__previous_action__  = action
-            
+            public.__previous_action__  = action           
             action_cards = action.__card_list__
-            #print "start"
-            #print "action"
-            #print action_cards
-            #print "discard"
-            #print public.__discard_card__
-            #print public.__turn__
-            #print len(person[public.__turn__].__hand_cards__)
-            #print person[public.__turn__].__hand_cards__
-            #print 
             to_del = {}
             for each in action_cards:
                 if each not in to_del:
@@ -168,36 +160,23 @@ class MahjongEnv(roomai.common.AbstractEnv):
                 else:
                     to_del[each] = to_del[each] + 1
             if action.option != action.Discard:
-                #print action.option
                 if public.__discard_card__ in to_del:
                     to_del[public.__discard_card__] = to_del[public.__discard_card__] - 1
                 person[public.__turn__].__discard__ = person[public.__turn__].__discard__ + action_cards
-                #print person[public.__turn__].__discard__
-                #assert 0
-            #print to_del
-            #a = len(person[public.__turn__].__hand_cards__)
-            #print a
-            #print to_del
-            #print action.option
-            #print action_cards
-            #before = person[public.__turn__].__hand_cards__
             person[public.__turn__].__del_card__(to_del)
-            #b = len(person[public.__turn__].__hand_cards__)
-            '''
-            if a == b:
-                print action_cards
-                print action.option
-                print before
-                print to_del
-                print person[public.__turn__].__hand_cards__
-                assert 0
-            '''
-            #assert 0
             '''[summary]
             
             将碰的牌记录到public_state
             '''
             if action.option in (MahjongAction.Pong,MahjongAction.Chow,MahjongAction.Kong,MahjongAction.ConKong):
+                #print action.__card__
+                #assert 0
+                #person[public.__turn__].____out_of_hand_cards__.append(action.__card__)
+                person[public.__turn__].__out_of_hand_cards__ = person[public.__turn__].__out_of_hand_cards__ +  action.__card_list__
+                # print len(person[public.__turn__].__out_of_hand_cards__)
+                # print person[public.__turn__].__out_of_hand_cards__
+                # print len(person[public.__turn__].__hand_cards__)
+                # assert 0
                 # 如果动作是非杠或者暗杠
                 if action.option != MahjongAction.ConKong:
                     public.__players_action__.append((action.option,public.__discard_player__,public.__turn__,action.__card__))
@@ -210,47 +189,27 @@ class MahjongEnv(roomai.common.AbstractEnv):
                     else:
                         public.__is_terminal__ = True
                         public.__scores__           = self.__compute_scores__()
-                person[public.__turn__].__discard__           = []
+                #person[public.__turn__].__discard__           = []
                 public.__turn__                               = public.__turn__
                 person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
                 #
                 #print person[public.__turn__].__available_actions__
                 self.__gen_history__()
                 return self.__gen_infos__(),public,person,private
-
-#        """[summary]
-#        动作为杠
-#        """
-#        if action.effective == True and action.option == :
-#            public.__previous_id__      = public.__turn__
-#            public.__previous_action__  = action
-#            person[public.__turn__].__discard__ = []
-#            public.__players_kong__.append((public.__discard_player__,public.__turn__,kong))
-#            
-#            public.__turn__                                = public.__turn__
-#            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
-#            self.__gen_history__()
-#            return self.__gen_infos__(),public,person,private
-#        """
-#        动作为暗杠
-#        """
-#        if action.effective == True and action.option == MahjongAction.ConKong:
-#            public.__previous_id__               = public.__turn__
-#            public.__previous_action__           = action
-#            person[public.__turn__].__discard__ = []
-#            public.conkong[public.__turn__]      = public.conkong[public.__turn__] + 1
-#            person[public.__turn__].__add_card__(private.__keep_cards__.pop())
-#            public.__turn__                                = public.__turn__
-#            person[public.__turn__].__available_actions__ = self.available_actions(public,person[public.__turn__])
-#            self.__gen_history__()
-#            return self.__gen_infos__(),public,person,private
             if action.option == MahjongAction.Discard:
                 public.__discard_player__ = public.__turn__
                 public.__discard_card__   = action.__card_list__[0]
         #assert 0
         #判断是不是有人胡牌
         i = (public.__turn__ + 1) % self.__params__["num_players"]
-        while (i != public.__discard_player__ and public.__discard_player__ is not None):
+        # print action.option
+        # print action.__card__
+        # print public.__discard_player__
+        # print "******"
+        while (i != public.__discard_player__ and public.__discard_player__ is not None): 
+            # print  "player: %d" %i
+            # print len(person[i].__hand_cards__)
+            # print "end"
             available_actions = self.available_actions_win(public,person[i])
             if len(available_actions) != 0:
                 public.__previous_id__     = public.__turn__
@@ -313,10 +272,13 @@ class MahjongEnv(roomai.common.AbstractEnv):
         turn    = public.turn
         key_actions = dict()
         #available_actions = {}
-        cards = person.__hand_cards__ + person.__discard__
+        cards = person.__hand_cards__ #+ person.__out_of_hand_cards__
+
         cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
-        if (len(cards) > 14):
-            assert 0
+        # if (len(cards) != 14):
+        #     print len(person.__hand_cards__)
+        #     print len(person.__out_of_hand_cards__)
+        #     assert 0
         if MahjongCard.isWin(cards) == True:
             key = "%s_%s_%s" %(MahjongAction.Win,0,":".join([each.key for each in cards]))
             key_actions[key] = MahjongAction.lookup(key,cards)
@@ -390,11 +352,16 @@ class MahjongEnv(roomai.common.AbstractEnv):
         discard = public.__discard_card__
         cards = []
         isInsert = False
-        cards = person.__hand_cards__ + person.__discard__
+        cards = person.__hand_cards__ #+ person.__out_of_hand_cards__
+
+        #print person.__discard__
         cards.append(discard)
         cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
-        if (len(cards) > 14):
-            assert 0
+        # if (len(cards) != 14):
+        #     print len(person.__hand_cards__)
+        #     print len(person.__out_of_hand_cards__)
+        #     print public.__discard_card__.key
+        #     assert 0
         #for each in person.hand_cards:
         #    if MahjongCard.compare(each,discard) < 0 or isInsert == True:
         #        cards.append(each)

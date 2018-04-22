@@ -6,8 +6,8 @@ from MahjongInfo import *
 from MahjongUtil import *
 import time
 import sys
-sys.path.append("d:/RoomAI/")
-sys.path.append("/Users/jichao/Desktop/RoomAI")
+#sys.path.append("d:/RoomAI/")
+sys.path.append("/Users/jichao/Documents/RoomAi/RoomAI/")
 import roomai.common
 from roomai.common import AbstractPlayer
 class RandomPlayer(AbstractPlayer):
@@ -37,4 +37,5 @@ if __name__ == '__main__':
 
         scores = MahjongEnv.compete(env, players)
     print time.clock()
+
     # print scores

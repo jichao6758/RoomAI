@@ -143,6 +143,7 @@ class MahjongPersonState(roomai.common.AbstractPersonState):
         self.__available_actions__  =    dict() 
         self.__discard__            =    []
         self.__conkong__            =    []
+        self.__out_of_hand_cards__  =    []   # 包括碰，吃，杠的牌
 
     @property
     def id(self):

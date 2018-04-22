@@ -3,6 +3,11 @@
 #import roomai.common
 import copy
 import functools
+import platform
+# if (platform.python_version().split('.')[0] == '3'):
+#     import queue as q
+# else:
+#     import Queue as q
 point_str_to_rank           = {'1':0, '2':1, '3':2, '4':3,  '5':4,  '6':5,  '7':6,  '8':7,\
                                '9':8}
 point_rank_to_str           = {0:'1', 1:'2', 2:'3', 3:'4', 4:'5',  5:'6',  6:'7',   7:'8',\
@@ -23,6 +28,12 @@ class StateSpace:
     """
     drawStage       = 1
     discardStage    = 2
+
+class cardNum():
+    def __init__(self,card,num):
+        self.card = card
+        self.num = num
+    
 
 class MahjongCard(object):
     """docstring for MahjongCard"""
@@ -167,6 +178,7 @@ class MahjongCard(object):
         pr2 = mahjongcard2.__point_rank__
         pr3 = mahjongcard3.__point_rank__
 
+
         if suit1 == suit2 == suit3 and pr2 - pr1 == pr3 - pr2 == 1 :
             return True
         else:
@@ -186,7 +198,8 @@ class MahjongCard(object):
         #key = 0
         #for i in range(10):
         #    key = key + (mahjongcard1.suit_rank - mahjongcard2.suit_rank)
-        return  (mahjongcard1.__suit_rank__ - mahjongcard2.__suit_rank__) * 10  + (mahjongcard1.__point_rank__ - mahjongcard1.__point_rank__)
+        #
+        return  (mahjongcard1.__suit_rank__ - mahjongcard2.__suit_rank__) * 100  + (mahjongcard1.__point_rank__ - mahjongcard2.__point_rank__)
         #pr1 = mahjongcard1.suit
         #pr2 = mahjongcard2.suit
 
@@ -199,23 +212,137 @@ class MahjongCard(object):
         #    return mahjongcard1.point_rank - mahjongcard2.point_rank
         #else:
         #    return mahjongcard1.suit_rank - mahjongcard2.suit_rank
+        #    
     @classmethod
-    def isWin(cls,mahjongcards):
-        # 
-        # pair win 
-        #
-        global win_pattern
-        #print len(win_pattern)
-
-        key = ",".join([each.__key__ for each in mahjongcards])
-        #print key
-        #print win_pattern[0]
-        #assert 0
-        #return False
-        if key in win_pattern:
+    def recuWinFunc(cls,card_list,isPairExist):
+        #print "aa %s %d" %(card_list[0].card.__key__ , card_list[0].num)
+        #print "bb"
+        # if  card_list[0].card.__key__ == '2_Dot':
+        #     print card_list[0].num
+        #     assert 0
+        if len(card_list) == 0:
             return True
         else:
-            return False
+            #card = card_list[0]
+            if card_list[0].num == 0:
+                return cls.recuWinFunc(card_list[1:],isPairExist)
+            if card_list[0].num == 1:
+                if len(card_list) >= 3 and cls.isSequence(card_list[0].card,card_list[1].card,card_list[2].card) == True:
+                    card_list[1].num = card_list[1].num - 1
+                    card_list[2].num = card_list[2].num - 1
+                    if cls.recuWinFunc(card_list[1:],isPairExist) == True:
+                        return True
+                    card_list[1].num = card_list[1].num + 1
+                    card_list[2].num = card_list[2].num + 1
+                return False
+            if card_list[0].num == 2:
+                if isPairExist == False:
+                    #isPairExist = True
+                    if cls.recuWinFunc(card_list[1:],True) == True:
+                        return True
+                # print card_list[0].card.__key__
+                # print card_list[0].num
+                # print card_list[1].card.__key__
+                # print card_list[1].num
+                # print card_list[2].card.__key__
+                # print card_list[2].num
+                #assert 0
+                if len(card_list) >= 3 and cls.isSequence(card_list[0].card,card_list[1].card,card_list[2].card) == True and card_list[1].num >= 2 and card_list[2].num >= 2:
+                    card_list[1].num = card_list[1].num - 2
+                    card_list[2].num = card_list[2].num - 2
+                    #print "in it"
+                    if cls.recuWinFunc(card_list[1:],isPairExist) == True:
+                        return True
+                    card_list[1].num = card_list[1].num + 2
+                    card_list[2].num = card_list[2].num + 2
+                return False
+            if card_list[0].num == 3:
+                if isPairExist == False:
+                    card_list[0].num = card_list[0].num - 2
+                    if cls.recuWinFunc(card_list,True) == True:
+                        return True
+                    card_list[0].num = card_list[0].num + 2
+                    # #
+                return cls.recuWinFunc(card_list[1:],isPairExist)
+            if card_list[0].num == 4:
+                if isPairExist == False:
+                    card_list[0].num = card_list[0].num - 2
+                    if cls.recuWinFunc(card_list,True) == True:
+                        return True
+                    card_list[0].num = card_list[0].num + 2
+                if len(card_list) >= 3 and cls.isSequence(card_list[0].card,card_list[1].card,card_list[2].card) == True and card_list[1].num >= 2 and card_list[2].num >= 2:
+                    card_list[0].num = card_list[0].num - 2
+                    card_list[1].num = card_list[1].num - 2
+                    card_list[2].num = card_list[2].num - 2
+                    if cls.recuWinFunc(card_list[1:],isPairExist) == True:
+                        return True
+                    card_list[0].num = card_list[0].num + 2
+                    card_list[1].num = card_list[1].num + 2
+                    card_list[2].num = card_list[2].num + 2
+                card_list[0].num = card_list[0].num - 3
+                if cls.recuWinFunc(card_list,isPairExist) == True:
+                    return True
+                card_list[0].num = card_list[0].num + 3
+                return False
+    @classmethod
+    def isWin(cls,mahjongcards):
+        befor = None
+        num = 0
+        my_list = []
+
+        for each in mahjongcards:
+
+            if befor == None or befor.__key__ != each.__key__:
+                if befor != None:
+                    my_list.append(cardNum(befor,num))
+                befor = each 
+                num = 1
+            else:
+                num = num + 1
+        my_list.append(cardNum(each,num))
+        isPairExist = False
+        isPairNum = 0
+        if len(my_list) == 7:
+            for card in my_list:
+                if card.num == 2:
+                    isPairNum = isPairNum + 1
+            if isPairNum == 7:
+                return True
+        #print my_list
+        #assert 0
+        # print "as"
+        # print my_list[0].num
+        # print my_list[1].num
+        # print my_list[2].num
+        # print my_list[3].num
+        # print "abb"
+        return cls.recuWinFunc(my_list,isPairExist)
+
+
+    # @classmethod
+    # def isWin(cls,mahjongcards,):
+        # # 
+        # # pair win 
+        # #
+        # #对对胡
+        # # isAllPair = True
+        # # for i in range(0,14,2):
+        # #     if MahjongCard.isPair(mahjongcards[i],mahjongcards[i + 1]) == False:
+        # #         isAllPair = False
+        # # if isAllPair == True:
+        # #     return isAllPair 
+        # global win_pattern
+        # #print len(win_pattern)
+
+        # key = ",".join([each.__key__ for each in mahjongcards])
+        # #print key
+        # #print win_pattern[0]
+        # #assert 0
+        # #return Falser
+        # if key in win_pattern:
+        #     return True
+        # else:
+        #     return False
             
     def __deepcopy__(self, newinstance = None, memodict={}):
         if newinstance is None:
@@ -236,29 +363,28 @@ for i in range(0,4):
         point = "1"
         AllMahjongCards["%s_%s" %(point,suit)] = MahjongCard("%s_%s" %(point,suit))
 
+# i = 0 
 
-
-win_pattern = {}
-if len(win_pattern) == 0:
-    #fwrite = open("/Users/jichao/Desktop/RoomAI/roomai/mahjong/result_sort.txt","w")
-    #fopen = open("result.txt","r")
-    #for each in open("D:/RoomAI/roomai/mahjong/result.txt","r"):
-    for each in open("/Users/jichao/Desktop/RoomAI/roomai/mahjong/result_sort.txt","r"):
-        #cards = [MahjongCard(each_card.split("_")[1],each_card.split("_")[0]) for each_card in each.strip().split(",")]
-        #print cards[0].key
-        #cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
-        
-        #card_pattern = ",".join([card.key for card in cards])
-        #print card_pattern
-        #assert 0
-        #win_pattern.append(card_pattern)
-        #fwrite.write(card_pattern + "\n")
-        #win_pattern.append(each.strip())
-        win_pattern[each] = 0
-    #fwrite.close()
-    #print len(win_pattern)
-    #print win_pattern[0]
-    #assert 0
+# for each in open("/Users/jichao/Documents/RoomAi/RoomAI/roomai/mahjong/win_pattern4.txt","r"):
+#     i = i + 1 
+#     print i
+#     cards = [MahjongCard(each_card.split("_")[0],each_card.split("_")[1]) for each_card in each.strip().split(",")]
+#     #tmp = '1_Dot,1_Dot,2_Dot,2_Dot,2_Dot,2_Dot,3_Dot,3_Dot'
+#     #cards = [MahjongCard(each_card.split("_")[0],each_card.split("_")[1]) for each_card in tmp.strip().split(",")]
+#     cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
+#     card_pattern = ",".join([card.key for card in cards])
+#     #print card_pattern
+#     #assert 0
+#     if MahjongCard.isWin2(cards) == False:
+#         print card_pattern
+#         assert 0
+# win_pattern = {}
+# if len(win_pattern) == 0:
+#     for each in open("/Users/jichao/Documents/RoomAi/RoomAI/roomai/mahjong/result_sort.txt","r"):
+#         cards = [MahjongCard(each_card.split("_")[0],each_card.split("_")[1]) for each_card in each.strip().split(",")]
+#         cards.sort(key = functools.cmp_to_key(MahjongCard.compare))
+#         card_pattern = ",".join([card.key for card in cards])
+#         win_pattern[each] = 0
 
 
 
